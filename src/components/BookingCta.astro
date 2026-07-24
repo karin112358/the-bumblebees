@@ -10,6 +10,17 @@ const instagram = 'https://www.instagram.com/bumblebeestheband';
   <div class="inner">
     <p class="eyebrow">Band buchen</p>
     <h2>Holt euch die Bumblebees auf eure Bühne.</h2>
+    <p class="body">
+      Ihr plant ein Fest, eine Firmenveranstaltung, einen Musikabend oder ein
+      anderes Event, bei dem handgemachte Rockmusik nicht fehlen darf?
+    </p>
+    <p class="body">
+      Wir bieten rund zwei Stunden Rock, Funk, Soul und Pop, auf Wunsch
+      aufgeteilt auf mehrere Sets. Schreibt uns, wann und wo eure Veranstaltung
+      stattfindet, wie groß sie ungefähr ist und welche Spielzeit ihr euch
+      vorstellt. Wir melden uns mit den wichtigsten Informationen zu
+      Verfügbarkeit, Technik und Konditionen.
+    </p>
 
     <div class="actions">
       <a class="btn solid" href={`mailto:${email}`}>{email}</a>
@@ -17,6 +28,13 @@ const instagram = 'https://www.instagram.com/bumblebeestheband';
         >@bumblebeestheband</a
       >
     </div>
+
+    <p class="body">
+      Einen aktuellen Eindruck von unseren Auftritten findet ihr auch auf
+      Instagram: <a href={instagram} target="_blank" rel="noopener"
+        >@bumblebeestheband</a
+      >
+    </p>
   </div>
 </section>
 
@@ -62,6 +80,47 @@ const instagram = 'https://www.instagram.com/bumblebeestheband';
     line-height: 0.94;
     color: var(--bb-panel);
     max-inline-size: 640px;
+  }
+
+  /*
+   * .body is styled in About.astro, but Astro scopes component styles, so none
+   * of that reaches here — these paragraphs were rendering with the inherited
+   * grey --bb-text on amber and no margins at all (the global reset zeroes them).
+   *
+   * Narrower than the h2's 640px: at 16px this is roughly 70 characters, while
+   * the full container width was running to about 130.
+   */
+  .body {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--bb-panel);
+    max-inline-size: 560px;
+    margin-block-start: 22px;
+  }
+
+  .body + .body {
+    margin-block-start: 1.1em;
+  }
+
+  .actions + .body {
+    margin-block-start: 28px;
+  }
+
+  /*
+   * Without this the global `a { color: var(--bb-amber) }` paints the link the
+   * exact colour of the panel behind it. Colour alone no longer distinguishes it
+   * from the surrounding text either, so it carries an underline.
+   */
+  .body a {
+    color: var(--bb-panel);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+
+  .body a:hover {
+    color: var(--bb-panel);
+    text-decoration-thickness: 2px;
   }
 
   .actions {

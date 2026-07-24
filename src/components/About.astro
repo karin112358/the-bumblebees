@@ -4,21 +4,52 @@ import { Image } from 'astro:assets';
 import { members } from '../data/members';
 
 import portraitPhoto from '../assets/images/band-2.jpg';
+
+/*
+ * Derived from members.ts rather than typed out, for the same reason the member
+ * count was: a hand-written list drifts. It had already picked up three errors —
+ * it said "Klavier" where the grid says "Piano", hid the second saxophone, and
+ * listed six instruments for seven people.
+ *
+ * Roles keep the order they appear in members.ts, and a role held by more than
+ * one member is marked with its count.
+ */
+const lineup = [...new Set(members.map((m) => m.role))]
+  .map((role) => {
+    const held = members.filter((m) => m.role === role).length;
+    return held > 1 ? `${role}` : role;
+  })
+  .join(', ');
 ---
 
 <section class="about bb-section" id="ueber-uns">
   <div>
     <p class="bb-eyebrow">Über uns</p>
     <h2>Laut, eingespielt<br />und gemacht<br />für die Bühne.</h2>
+    {
+      /*
+      TODO: "bekannte Rocksongs" is inferred from the marquee — narrow it to what
+      you actually play if you can (z. B. "Rock und Austropop aus vier
+      Jahrzehnten"). A booker scanning this wants to picture the evening.
+    */
+    }
     <p class="body">
-      Die Bumblebees sind Hobbymusiker — Gesang, Gitarre, Saxophone, Bass,
-      Schlagzeug und Klavier — die aus reiner Freude zusammenspielen und ein
-      paar Konzerte im Jahr geben. Fette Riffs, ein bisschen Bläser und eine
-      Setlist, bei der der Spaß im Vordergrund steht.
+      Von „December, 1963“ über „Smooth Operator“ und „Virtual Insanity“ bis zu
+      „Under Pressure“, „Hold the Line“ und „Sweet Child o’ Mine“: Unsere
+      Setlist bewegt sich zwischen Rock, Funk, Soul und Pop.
     </p>
-    <p class="lineup">
-      Gesang, Gitarre, Saxophon, Bass, Schlagzeug &amp; Klavier
+    <p class="body">
+      Wir spielen bekannte Songs, aber nicht nur die üblichen
+      Coverband-Klassiker. Entscheidend ist für uns, dass die Musik Groove hat,
+      auf der Bühne Spaß macht und zu unserem Sound mit Gitarren, Piano und
+      Saxophon passt.
     </p>
+    <p class="body">
+      Ob Stadtfest, Vereinsveranstaltung, Firmenfeier oder Musikabend: Wir
+      freuen uns über Bühnen, auf denen ehrliche, handgemachte Livemusik gefragt
+      ist.
+    </p>
+    <p class="lineup">{lineup}</p>
   </div>
 
   <div class="portrait">
@@ -52,6 +83,11 @@ import portraitPhoto from '../assets/images/band-2.jpg';
     line-height: 1.75;
     color: var(--bb-text);
     max-inline-size: 460px;
+  }
+
+  /* The global reset zeroes every margin, so paragraph spacing is set here. */
+  .body + .body {
+    margin-block-start: 1.1em;
   }
 
   .lineup {
