@@ -37,10 +37,27 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       depending on how `base` is written, so strip it and add one back —
       otherwise the two concatenate into "/the-bumblebeesfavicon.svg".
     */}
+    {/*
+      All three are needed and none is redundant: modern browsers take the SVG,
+      older ones and Windows shortcuts fall back to the .ico, and iOS uses the
+      apple-touch-icon for a home-screen tile rather than either. The .ico also
+      has to be declared rather than left to the automatic /favicon.ico probe —
+      that probe hits the domain root, which on a project page belongs to
+      GitHub, not to this site.
+    */}
     <link
       rel="icon"
       type="image/svg+xml"
       href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`}
+    />
+    <link
+      rel="icon"
+      sizes="16x16 32x32 48x48"
+      href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.ico`}
+    />
+    <link
+      rel="apple-touch-icon"
+      href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/apple-touch-icon.png`}
     />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />

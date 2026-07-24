@@ -3,8 +3,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/SiteNav.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
-// Mirrors BookingCta — the same address the band already publishes.
-const email = 'booking@thebumblebees.band';
+// Mirrors BookingCta — keep the two in step.
+// TODO: confirm this mailbox actually exists. The local part is unchanged from
+// the handoff; only the domain was corrected to the real one (.at, not .band).
+const email = 'booking@thebumblebees.at';
 ---
 
 <BaseLayout
