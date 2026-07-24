@@ -1,0 +1,179 @@
+/*
+ * The one global stylesheet. Imported once, in BaseLayout.astro.
+ *
+ * Plain .css imports are never scoped by Astro — only <style> blocks inside
+ * .astro files get the data-astro-cid-* treatment. So this file is the only
+ * place global rules belong.
+ *
+ * Custom properties on :root reach every component through inheritance, and
+ * Astro's scoping can't interfere: it rewrites selectors, not custom-property
+ * resolution. That makes tokens the right way to share values across scopes.
+ *
+ * Values come from the "STAGE" design handoff.
+ */
+
+:root {
+  /* Brand */
+  --bb-amber: #f3c814;
+  --bb-amber-hover: #f7d54a;
+
+  /* Surfaces, page shell outward */
+  --bb-black: #1c1c1b;
+  --bb-panel: #131312;
+  --bb-card: #232320;
+
+  /* Text */
+  --bb-white: #ffffff;
+  --bb-text: #a9a9b0;
+  --bb-muted: #8a8a92;
+  --bb-faint: #77777e;
+  --bb-dim: #5b5b62;
+  --bb-nav: #cfcfd4;
+
+  /* Lines */
+  --bb-border: #26262c;
+  --bb-border-row: #2c2c33;
+  --bb-border-tag: #3a3a41;
+
+  --bb-display: 'Anton', Impact, sans-serif;
+  --bb-condensed: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --bb-body: 'Manrope', system-ui, sans-serif;
+  --bb-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /*
+   * The prototype is a fixed 1180px column with flat 44px side padding. Below
+   * that the container goes fluid, so the gutter has to shrink with it —
+   * otherwise 44px eats a third of a phone screen.
+   */
+  --bb-max: 1180px;
+  --bb-gutter: clamp(20px, 4vw, 44px);
+  /* 36px logo + 22px padding top and bottom. Drives scroll-padding-top too. */
+  --bb-nav-h: 80px;
+  --bb-section-y: clamp(56px, 8vw, 80px);
+  --bb-radius: 8px;
+  --bb-radius-lg: 10px;
+  --bb-radius-btn: 4px;
+
+  /* Repeated in every slot that has no photo yet. */
+  --bb-stripes: repeating-linear-gradient(45deg, #1a1a1d, #1a1a1d 12px, #151517 12px, #151517 24px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+body {
+  min-height: 100svh;
+  background: var(--bb-black);
+  color: var(--bb-text);
+  font-family: var(--bb-body);
+  line-height: 1.6;
+  /* The design is dark-only; stop mobile browsers re-tinting form controls. */
+  color-scheme: dark;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-inline-size: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--bb-amber);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--bb-amber-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--bb-amber);
+  outline-offset: 3px;
+}
+
+/*
+ * Every heading in this design is a display face at a fixed size with tight
+ * leading, so the browser defaults are more hindrance than help.
+ */
+h1,
+h2,
+h3 {
+  font-family: var(--bb-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--bb-white);
+}
+
+/*
+ * Utility, not a component: the small amber monospace label prefixing each
+ * section ("/ 01 — Über uns"). Used in six places, always identically.
+ */
+.bb-eyebrow {
+  font-family: var(--bb-mono);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--bb-amber);
+}
+
+/*
+ * In the design only the About block has top padding — every later section sits
+ * flush under the one above and pads only its bottom. About re-adds the top.
+ */
+.bb-section {
+  max-inline-size: var(--bb-max);
+  margin-inline: auto;
+  padding-inline: var(--bb-gutter);
+  padding-block-end: var(--bb-section-y);
+}
+
+/* Section heading + eyebrow, baseline-aligned across the full width. */
+.bb-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-block-end: 26px;
+}
+
+.bb-section-head h2 {
+  font-size: clamp(30px, 5vw, 40px);
+}
+
+.bb-placeholder {
+  background: var(--bb-stripes);
+  border: 1px solid var(--bb-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--bb-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bb-dim);
+  text-align: center;
+  padding: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

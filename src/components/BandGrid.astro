@@ -1,0 +1,96 @@
+---
+import { Image } from 'astro:assets';
+
+import { members } from '../data/members';
+---
+
+<section class="bb-section" id="band">
+  <div class="bb-section-head">
+    <h2>Die Band</h2>
+    <p class="bb-eyebrow">Besetzung</p>
+  </div>
+
+  <ul class="grid">
+    {
+      members.map(({ name, role, photo }) => (
+        <li>
+          <div class="frame">
+            {
+              photo ? (
+                <Image src={photo} alt={`${name}, ${role}`} widths={[280, 560]} sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 280px" />
+              ) : (
+                <span class="bb-placeholder">◹ Foto</span>
+              )
+            }
+          </div>
+          <p class="role">{role}</p>
+          <p class="name">{name}</p>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    list-style: none;
+    padding: 0;
+  }
+
+  .frame {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--bb-radius);
+    overflow: hidden;
+    border: 1px solid var(--bb-border);
+    margin-block-end: 12px;
+  }
+
+  .frame :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* The placeholder needs to fill the square, and carries its own border. */
+  .frame .bb-placeholder {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    font-size: 10px;
+  }
+
+  .role {
+    font-family: var(--bb-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--bb-amber);
+    text-transform: uppercase;
+  }
+
+  .name {
+    font-family: var(--bb-condensed);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--bb-white);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1.12;
+    margin-block-start: 2px;
+  }
+
+  @media (max-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+  }
+</style>

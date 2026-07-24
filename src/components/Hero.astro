@@ -1,0 +1,163 @@
+---
+import { Image } from 'astro:assets';
+
+import Wordmark from '../assets/logo/wordmark.svg';
+import heroPhoto from '../assets/images/band-1.jpg';
+---
+
+<section class="hero" id="top">
+  <Image
+    class="photo"
+    src={heroPhoto}
+    alt="Die Bumblebees live auf der Bühne"
+    widths={[760, 1180, 1693]}
+    sizes="100vw"
+    loading="eager"
+    fetchpriority="high"
+  />
+  <div class="glow" aria-hidden="true"></div>
+  <div class="scrim" aria-hidden="true"></div>
+
+  <div class="content">
+    <p class="kicker">Live-Musik · Rock</p>
+    <h1 class="wordmark">
+      <Wordmark role="img" aria-label="The Bumblebees" />
+    </h1>
+    <div class="actions">
+      <a class="btn btn-solid" href="#konzerte">Kommende Konzerte →</a>
+      <a class="btn btn-ghost" href="#medien">Uns live sehen</a>
+    </div>
+  </div>
+
+  <span class="rotated" aria-hidden="true">Live-Musik</span>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    /* 720px in the prototype; shrinks toward the handoff's ~520px on phones. */
+    height: clamp(520px, 62vw, 720px);
+    overflow: hidden;
+  }
+
+  .photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Framed slightly above centre so the band sits under the wordmark. */
+    object-position: center 32%;
+  }
+
+  .glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 40%, rgba(244, 178, 35, 0.28), transparent 55%),
+      radial-gradient(circle at 78% 70%, rgba(78, 120, 220, 0.3), transparent 55%);
+    mix-blend-mode: screen;
+  }
+
+  .scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(11, 11, 13, 0.35), rgba(11, 11, 13, 0.85));
+  }
+
+  .content {
+    position: absolute;
+    z-index: 10;
+    left: var(--bb-gutter);
+    right: var(--bb-gutter);
+    bottom: clamp(32px, 6vw, 60px);
+  }
+
+  .kicker {
+    font-family: var(--bb-condensed);
+    text-transform: uppercase;
+    letter-spacing: 0.34em;
+    font-weight: 600;
+    font-size: clamp(12px, 2vw, 15px);
+    color: var(--bb-amber);
+    margin-block-end: 6px;
+  }
+
+  .wordmark {
+    /* The <h1> is only a semantic wrapper; the SVG carries the accessible name. */
+    line-height: 0;
+  }
+
+  .wordmark :global(svg) {
+    width: min(660px, 92%);
+    height: auto;
+    filter: drop-shadow(0 10px 34px rgba(0, 0, 0, 0.55));
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-block-start: clamp(20px, 3vw, 30px);
+  }
+
+  .btn {
+    font-family: var(--bb-condensed);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 16px;
+    padding: 14px 26px;
+    border-radius: var(--bb-radius-btn);
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn-solid {
+    background: var(--bb-amber);
+    color: var(--bb-panel);
+  }
+
+  .btn-solid:hover {
+    background: var(--bb-amber-hover);
+    color: var(--bb-panel);
+  }
+
+  .btn-ghost {
+    border: 1.5px solid #55555c;
+    color: var(--bb-white);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--bb-white);
+    color: var(--bb-white);
+  }
+
+  .rotated {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%) rotate(180deg);
+    writing-mode: vertical-rl;
+    font-family: var(--bb-display);
+    letter-spacing: 0.24em;
+    font-size: 22px;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
+  }
+
+  /* Decorative, and it collides with the buttons once the hero narrows. */
+  @media (max-width: 900px) {
+    .rotated {
+      display: none;
+    }
+
+    .actions .btn {
+      flex: 1 1 auto;
+      text-align: center;
+    }
+  }
+</style>

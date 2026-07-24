@@ -1,0 +1,77 @@
+---
+import { members } from '../data/members';
+
+/*
+ * The handoff copy said "sechs Hobbymusiker" / "6 Mitglieder" while listing
+ * seven instruments and shipping seven member cards. The count is derived here
+ * so the prose can never drift from the grid again.
+ */
+const count = members.length;
+---
+
+<section class="about bb-section" id="ueber-uns">
+  <div>
+    <p class="bb-eyebrow">/ 01 — Über uns</p>
+    <h2>Laut, eingespielt<br />und gemacht<br />für die Bühne.</h2>
+    <p class="body">
+      Die Bumblebees sind {count} Hobbymusiker — Gesang, Gitarre, zwei Saxophone, Bass, Schlagzeug
+      und Klavier — die aus reiner Freude zusammenspielen und ein paar Konzerte im Jahr geben. Fette
+      Riffs, ein bisschen Bläser und eine Setlist, bei der der Spaß im Vordergrund steht.
+    </p>
+    <p class="lineup">
+      {count} Mitglieder · Gesang, Gitarre, Saxophon (×2), Bass, Schlagzeug &amp; Klavier
+    </p>
+  </div>
+
+  {/* TODO: no dedicated band portrait supplied — swap the striped slot for a photo. */}
+  <div class="portrait bb-placeholder">◹ Bandporträt</div>
+</section>
+
+<style>
+  .about {
+    padding-block: var(--bb-section-y);
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(32px, 5vw, 56px);
+    align-items: center;
+  }
+
+  h2 {
+    font-size: clamp(34px, 5.4vw, 52px);
+    line-height: 0.98;
+    margin-block: 18px 22px;
+  }
+
+  .body {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--bb-text);
+    max-inline-size: 460px;
+  }
+
+  .lineup {
+    font-family: var(--bb-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--bb-faint);
+    text-transform: uppercase;
+    margin-block-start: 36px;
+    line-height: 1.8;
+  }
+
+  .portrait {
+    height: 420px;
+    border-radius: var(--bb-radius-lg);
+    overflow: hidden;
+  }
+
+  @media (max-width: 860px) {
+    .about {
+      grid-template-columns: 1fr;
+    }
+
+    .portrait {
+      height: 320px;
+    }
+  }
+</style>

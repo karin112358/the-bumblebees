@@ -1,0 +1,32 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="inner">
+    <span>© {year} The Bumblebees</span>
+    <span>Live-Musik · Rock</span>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--bb-panel);
+    padding-block: 26px;
+  }
+
+  .inner {
+    max-inline-size: var(--bb-max);
+    margin-inline: auto;
+    padding-inline: var(--bb-gutter);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-family: var(--bb-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: #55555c;
+    text-transform: uppercase;
+  }
+</style>

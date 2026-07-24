@@ -1,0 +1,80 @@
+---
+/*
+ * No clip supplied yet. The design specifies a placeholder block with a play
+ * button, so this renders as a non-interactive panel rather than a dead button —
+ * there is nothing to press. Swap the whole .stage div for an <iframe> or
+ * <video> once there is a real clip.
+ */
+---
+
+<section class="bb-section" id="video">
+  <div class="bb-section-head">
+    <h2>Ansehen</h2>
+    <p class="bb-eyebrow">/ 03 — Video</p>
+  </div>
+
+  <div class="stage">
+    <div class="wash" aria-hidden="true"></div>
+    <div class="inner">
+      <span class="play" aria-hidden="true"></span>
+      <p class="caption">◹ Live-Video — Hauptclip</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stage {
+    position: relative;
+    height: clamp(240px, 42vw, 440px);
+    border-radius: var(--bb-radius-lg);
+    overflow: hidden;
+    background: var(--bb-stripes);
+    border: 1px solid var(--bb-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(244, 178, 35, 0.14), transparent 60%);
+  }
+
+  .inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .play {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    background: var(--bb-amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Triangle drawn from borders, nudged right to sit optically centred. */
+  .play::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 22px solid var(--bb-panel);
+    border-block: 13px solid transparent;
+    margin-inline-start: 5px;
+  }
+
+  .caption {
+    font-family: var(--bb-mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: var(--bb-muted);
+    text-transform: uppercase;
+    text-align: center;
+  }
+</style>

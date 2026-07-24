@@ -1,0 +1,27 @@
+# Konzerttermine der Bumblebees.
+#
+# Neuen Termin anlegen: Eintrag unten anhängen. Schema in src/content.config.ts.
+#
+# Pflicht:  id (eindeutig), date (JJJJ-MM-TT), venue, city
+# Optional: country, ticketUrl, soldOut (Standard false), note
+#
+# `note` wird im Design als Tag rechts in der Zeile gerendert, z. B. "Eintritt frei".
+# Alles was wie eine Zahl oder Uhrzeit aussieht bitte quoten, z. B. note: "3:42".
+#
+# Vergangen/kommend wird beim Build aus `date` abgeleitet — siehe src/lib/shows.ts.
+
+- id: soundplatz-rohr-2026
+  date: 2026-08-28
+  venue: Soundplatz Rohr
+  city: Rohr
+  country: Österreich
+  soldOut: false
+  note: Eintritt frei
+
+- id: erntedankfest-bad-hall-2026
+  date: 2026-09-27
+  venue: Erntedankfest
+  city: Bad Hall
+  country: Österreich
+  soldOut: false
+  note: Eintritt frei

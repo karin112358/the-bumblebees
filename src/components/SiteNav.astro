@@ -1,0 +1,233 @@
+---
+/*
+ * bee.svg is ~57 KB of traced path data. Inlining it as an SVG component would
+ * push all of that into the HTML on every load, so it is imported with Vite's
+ * ?url suffix and served as a separately cacheable file instead.
+ */
+import beeUrl from '../assets/logo/bee.svg?url';
+
+const links = [
+  { href: '#konzerte', label: 'Konzerte' },
+  { href: '#medien', label: 'Medien' },
+  { href: '#ueber-uns', label: 'Über uns' },
+  { href: '#buchen', label: 'Buchen' },
+];
+---
+
+{/* Watched by the observer below: once it scrolls out, the nav has lifted off. */}
+<div class="sentinel" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="#top">
+    <img src={beeUrl} alt="" width="34" height="36" />
+    <span>The Bumblebees</span>
+  </a>
+
+  <button class="toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+    <span class="sr-only">Menü öffnen</span>
+    <span class="bars" aria-hidden="true"></span>
+  </button>
+
+  <nav id="nav-links" class="links" aria-label="Hauptnavigation">
+    {links.map(({ href, label }) => <a href={href}>{label}</a>)}
+  </nav>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.toggle');
+  const header = document.querySelector<HTMLElement>('.nav');
+
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    toggle.querySelector('.sr-only')!.textContent = open ? 'Menü öffnen' : 'Menü schließen';
+    header?.classList.toggle('is-open', !open);
+  });
+
+  // Tapping a link on mobile should dismiss the drawer, not leave it covering
+  // the section it just scrolled to.
+  header?.querySelectorAll('.links a').forEach((link) =>
+    link.addEventListener('click', () => {
+      toggle?.setAttribute('aria-expanded', 'false');
+      header.classList.remove('is-open');
+    }),
+  );
+
+  /*
+   * The nav only takes a background once it detaches from the top. An observer
+   * on a 1px sentinel beats a scroll listener: it fires when the state actually
+   * changes rather than on every frame of every scroll.
+   */
+  const sentinel = document.querySelector('.sentinel');
+
+  if (sentinel && header) {
+    new IntersectionObserver(
+      ([entry]) => header.classList.toggle('is-stuck', !entry.isIntersecting),
+      { threshold: 0 },
+    ).observe(sentinel);
+  }
+</script>
+
+<style>
+  .sentinel {
+    position: absolute;
+    top: 0;
+    height: 1px;
+    width: 1px;
+  }
+
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    max-inline-size: var(--bb-max);
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px clamp(20px, 3.4vw, 40px);
+    /* At rest it sits on the panel; .is-stuck fills it in once it overlays content. */
+    background: transparent;
+    border-block-end: 1px solid transparent;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+
+  .nav.is-stuck,
+  /* An open drawer needs the bar opaque even at the very top of the page. */
+  .nav.is-open {
+    background: rgba(19, 19, 18, 0.92);
+    border-block-end-color: var(--bb-border);
+    backdrop-filter: blur(10px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--bb-display);
+    letter-spacing: 0.08em;
+    font-size: 17px;
+    text-transform: uppercase;
+    color: var(--bb-white);
+  }
+
+  .brand:hover {
+    color: var(--bb-white);
+  }
+
+  .brand img {
+    height: 36px;
+    width: auto;
+  }
+
+  .links {
+    display: flex;
+    gap: 30px;
+    font-family: var(--bb-condensed);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .links a {
+    color: var(--bb-nav);
+  }
+
+  /* "Konzerte" is the active section in the design. */
+  .links a:first-child {
+    color: var(--bb-amber);
+  }
+
+  .links a:hover {
+    color: var(--bb-amber-hover);
+  }
+
+  .toggle {
+    display: none;
+    background: none;
+    border: 0;
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  /* Three lines that fold into an X, drawn from one element plus its pseudos. */
+  .bars,
+  .bars::before,
+  .bars::after {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--bb-white);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .bars::before,
+  .bars::after {
+    content: '';
+    position: relative;
+  }
+
+  .bars::before {
+    top: -7px;
+  }
+
+  .bars::after {
+    top: 5px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 760px) {
+    .toggle {
+      display: block;
+    }
+
+    .links {
+      position: absolute;
+      inset-inline: 0;
+      top: 100%;
+      flex-direction: column;
+      gap: 0;
+      background: var(--bb-panel);
+      border-block: 1px solid var(--bb-border);
+      /* Collapsed by default; the toggle swaps in the open state below. */
+      display: none;
+    }
+
+    .nav.is-open .links {
+      display: flex;
+    }
+
+    .links a {
+      padding: 16px clamp(20px, 3.4vw, 40px);
+      font-size: 16px;
+    }
+
+    .links a + a {
+      border-block-start: 1px solid var(--bb-border);
+    }
+
+    .nav.is-open .bars {
+      transform: rotate(45deg);
+    }
+
+    .nav.is-open .bars::before {
+      opacity: 0;
+    }
+
+    .nav.is-open .bars::after {
+      top: -2px;
+      transform: rotate(-90deg);
+    }
+  }
+</style>

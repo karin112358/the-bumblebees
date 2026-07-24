@@ -1,0 +1,68 @@
+---
+const phrase = 'Rockmusik ✦ Live ✦ The Bumblebees ✦ ';
+
+// The track scrolls to -50% and restarts, so the content must be exactly two
+// identical halves for the loop to be seamless.
+const half = phrase.repeat(2);
+---
+
+<div class="marquee">
+  <div class="track" aria-hidden="true">
+    <span>{half}</span>
+    <span>{half}</span>
+  </div>
+  <span class="sr-only">Rockmusik. Live. The Bumblebees.</span>
+</div>
+
+<style>
+  .marquee {
+    background: var(--bb-amber);
+    overflow: hidden;
+    padding: 12px 0;
+  }
+
+  .track {
+    display: flex;
+    width: max-content;
+    animation: bb-marquee 22s linear infinite;
+    font-family: var(--bb-display);
+    font-size: clamp(20px, 3vw, 26px);
+    letter-spacing: 0.06em;
+    color: var(--bb-panel);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .track span {
+    padding: 0 22px;
+  }
+
+  @keyframes bb-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /*
+   * The global reduced-motion rule collapses animation duration, which would
+   * freeze the track mid-slide. Reset the transform so it parks at the start.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      animation: none;
+      transform: none;
+    }
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>

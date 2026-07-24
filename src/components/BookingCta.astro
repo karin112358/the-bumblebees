@@ -1,0 +1,111 @@
+---
+// TODO: confirm the real booking address — the handoff flagged this as a guess.
+const email = 'booking@thebumblebees.band';
+const instagram = 'https://www.instagram.com/bumblebeestheband';
+---
+
+<section class="booking" id="buchen">
+  <span class="watermark" aria-hidden="true">Book</span>
+
+  <div class="inner">
+    <p class="eyebrow">/ 05 — Band buchen</p>
+    <h2>Holt euch die Bumblebees auf eure Bühne.</h2>
+
+    <div class="actions">
+      <a class="btn solid" href={`mailto:${email}`}>{email}</a>
+      <a class="btn outline" href={instagram} target="_blank" rel="noopener">@bumblebeestheband</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .booking {
+    position: relative;
+    background: var(--bb-amber);
+    overflow: hidden;
+    padding: var(--bb-section-y) 0;
+  }
+
+  .inner {
+    position: relative;
+    max-inline-size: var(--bb-max);
+    margin-inline: auto;
+    padding-inline: var(--bb-gutter);
+  }
+
+  .watermark {
+    position: absolute;
+    right: -40px;
+    bottom: -60px;
+    font-family: var(--bb-display);
+    font-size: clamp(120px, 22vw, 220px);
+    color: rgba(11, 11, 13, 0.06);
+    line-height: 0.8;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  /* Inverted against the amber panel, so not the shared .bb-eyebrow. */
+  .eyebrow {
+    font-family: var(--bb-mono);
+    font-size: 12px;
+    letter-spacing: 0.24em;
+    color: var(--bb-panel);
+    text-transform: uppercase;
+    margin-block-end: 16px;
+  }
+
+  h2 {
+    font-size: clamp(36px, 6.4vw, 60px);
+    line-height: 0.94;
+    color: var(--bb-panel);
+    max-inline-size: 640px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 14px;
+    margin-block-start: 34px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: var(--bb-condensed);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 16px;
+    padding: 16px 30px;
+    border-radius: var(--bb-radius-btn);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+    /* The address is long enough to overflow a phone otherwise. */
+    overflow-wrap: anywhere;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .solid {
+    background: var(--bb-panel);
+    color: var(--bb-amber);
+  }
+
+  .solid:hover {
+    color: var(--bb-amber-hover);
+  }
+
+  .outline {
+    border: 2px solid var(--bb-panel);
+    color: var(--bb-panel);
+  }
+
+  .outline:hover {
+    color: var(--bb-panel);
+    opacity: 0.75;
+  }
+
+  .booking :focus-visible {
+    outline-color: var(--bb-panel);
+  }
+</style>
