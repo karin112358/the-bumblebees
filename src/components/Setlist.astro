@@ -1,0 +1,92 @@
+---
+import { setlist } from '../data/setlist';
+---
+
+<section class="bb-section" id="setlist">
+  <div class="bb-section-head">
+    <h2>Setlist</h2>
+    <p class="bb-eyebrow">Auszug</p>
+  </div>
+
+  <p class="lede">
+    Ein kleiner Auszug aus unserem Repertoire — von Rock über Funk bis Soul und
+    Pop.
+  </p>
+
+  {/* Ordered, because the numbers are the list position rather than decoration. */}
+  <ol class="list">
+    {
+      setlist.map(({ title, artist }, i) => (
+        <li>
+          <span class="num" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <div>
+            <p class="title">{title}</p>
+            <p class="artist">{artist}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .lede {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--bb-muted);
+    max-inline-size: 520px;
+    margin-block-end: 40px;
+  }
+
+  /*
+   * Two columns filled in source order, so the numbering reads 01 02 across
+   * rather than down. Because both columns share the grid's rows, the entries
+   * stay baseline-aligned across the gutter even when a title wraps.
+   */
+  .list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(28px, 5vw, 72px);
+    list-style: none;
+    padding: 0;
+  }
+
+  .list li {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    align-items: baseline;
+    padding-block: 18px;
+    border-block-end: 1px solid var(--bb-border-row);
+  }
+
+  .num {
+    font-family: var(--bb-display);
+    font-size: 15px;
+    color: var(--bb-amber);
+    letter-spacing: 0.04em;
+  }
+
+  .title {
+    font-family: var(--bb-condensed);
+    font-weight: 700;
+    font-size: 19px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+    color: var(--bb-white);
+  }
+
+  .artist {
+    font-size: 13px;
+    color: var(--bb-muted);
+    margin-block-start: 2px;
+  }
+
+  @media (max-width: 700px) {
+    .list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
