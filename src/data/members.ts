@@ -22,8 +22,8 @@ export interface Member {
 export const members: Member[] = [
   { name: 'Carina Wojtak', role: 'Gesang', photo: carina },
   { name: 'Wolfgang Neumar', role: 'Gitarre', photo: wolfgang },
-  { name: 'Birgit Hrazdera', role: 'Saxophon', photo: birgit },
   { name: 'Melanie Schallauer', role: 'Saxophon', photo: melanie },
+  { name: 'Birgit Hrazdera', role: 'Saxophon', photo: birgit },
   { name: 'Harald Pixner', role: 'Bass', photo: harald },
   { name: 'Martin Stummer', role: 'Schlagzeug', photo: martin },
   { name: 'Karin Huber', role: 'Piano', photo: karin },
