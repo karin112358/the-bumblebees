@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="150 190 4920 1290">
+<!-- viewBox is the exact painted bounding box (no padding), measured with getBBox(). The handoff export declared "150 190 4920 1290", which left 33.5 units of slack on the left, 22.2 top, 68.7 right and 28.2 bottom — enough to visibly inset the wordmark from the hero gutter. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="183.542 212.234 4817.761 1239.537">
 <path fill="#f3c814" d="M183.542,219.776h242.78v43.729h-99.526V1444.23H281.56V263.506h-98.018V219.776z"></path>
 <path fill="#f3c814" d="M764.096,219.776h45.241V1444.23h-45.241V825.973H583.143v618.258h-45.239V219.776h45.239V782.24h180.953&#xA;&#x9;&#x9;V219.776z"></path>
 <path fill="#f3c814" d="M975.201,1400.5h170.396v43.73H929.963V219.776h209.604v43.729H975.201V782.24h150.796v43.732H975.201&#xA;&#x9;&#x9;V1400.5z"></path>

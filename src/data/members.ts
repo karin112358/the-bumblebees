@@ -6,6 +6,7 @@ import harald from '../assets/members/harald.jpg';
 import karin from '../assets/members/karin.jpg';
 import martin from '../assets/members/martin.jpg';
 import wolfgang from '../assets/members/wolfgang.jpg';
+import melanie from '../assets/members/melanie.jpg';
 
 export interface Member {
   name: string;
@@ -22,7 +23,7 @@ export const members: Member[] = [
   { name: 'Carina Wojtak', role: 'Gesang', photo: carina },
   { name: 'Wolfgang Neumar', role: 'Gitarre', photo: wolfgang },
   { name: 'Birgit Hrazdera', role: 'Saxophon', photo: birgit },
-  { name: 'Melanie Schallauer', role: 'Saxophon' }, // TODO: no photo supplied yet.
+  { name: 'Melanie Schallauer', role: 'Saxophon', photo: melanie },
   { name: 'Harald Pixner', role: 'Bass', photo: harald },
   { name: 'Martin Stummer', role: 'Schlagzeug', photo: martin },
   { name: 'Karin Huber', role: 'Piano', photo: karin },

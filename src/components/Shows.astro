@@ -7,12 +7,15 @@ const { upcoming } = await getShows();
 <section class="bb-section" id="konzerte">
   <div class="bb-section-head">
     <h2>Kommende Konzerte</h2>
-    <p class="bb-eyebrow">/ 04 — Live</p>
+    <p class="bb-eyebrow">Live</p>
   </div>
 
   {
     upcoming.length === 0 ? (
-      <p class="empty">Aktuell sind keine Konzerte angekündigt. Termine folgen — schaut bald wieder vorbei.</p>
+      <p class="empty">
+        Aktuell sind keine Konzerte angekündigt. Termine folgen — schaut bald
+        wieder vorbei.
+      </p>
     ) : (
       <ol class="list">
         {upcoming.map((show, i) => {
@@ -36,9 +39,15 @@ const { upcoming } = await getShows();
               </div>
 
               {show.data.ticketUrl && !show.data.soldOut ? (
-                <a class="tag link" href={show.data.ticketUrl}>Tickets</a>
+                <a class="tag link" href={show.data.ticketUrl}>
+                  Tickets
+                </a>
               ) : (
-                tag && <span class:list={['tag', { out: show.data.soldOut }]}>{tag}</span>
+                tag && (
+                  <span class:list={['tag', { out: show.data.soldOut }]}>
+                    {tag}
+                  </span>
+                )
               )}
             </li>
           );

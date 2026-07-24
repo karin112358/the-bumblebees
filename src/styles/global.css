@@ -117,7 +117,7 @@ h3 {
 
 /*
  * Utility, not a component: the small amber monospace label prefixing each
- * section ("/ 01 — Über uns"). Used in six places, always identically.
+ * section ("Über uns"). Used in six places, always identically.
  */
 .bb-eyebrow {
   font-family: var(--bb-mono);
@@ -168,6 +168,7 @@ h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

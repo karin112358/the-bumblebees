@@ -6,26 +6,65 @@
  */
 import beeUrl from '../assets/logo/bee.svg?url';
 
+/*
+ * ?url here too, rather than the SVG-component import: Hero.astro already
+ * inlines wordmark.svg, and inlining it a second time would duplicate the whole
+ * path set in the HTML. As a URL both places share one cached file.
+ */
+import wordmarkUrl from '../assets/logo/wordmark.svg?url';
+
+/*
+ * Every section these point at lives on the start page, so the fragments are
+ * anchored to it rather than left bare. A bare "#konzerte" resolves against
+ * whatever document is showing — on /impressum/ that means scrolling nowhere.
+ *
+ * On the start page itself the path is identical to the current URL, so these
+ * stay same-document fragment navigations: no reload, and the smooth scrolling
+ * from BaseLayout still applies.
+ */
+const home = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
+
 const links = [
-  { href: '#konzerte', label: 'Konzerte' },
-  { href: '#medien', label: 'Medien' },
-  { href: '#ueber-uns', label: 'Über uns' },
-  { href: '#buchen', label: 'Buchen' },
-];
+  { hash: '#ueber-uns', label: 'Über uns' },
+  { hash: '#medien', label: 'Galerie' },
+  { hash: '#video', label: 'Videos' },
+  { hash: '#konzerte', label: 'Konzerte' },
+  { hash: '#buchen', label: 'Buchen' },
+].map(({ hash, label }) => ({ href: `${home}${hash}`, label }));
+
+/*
+ * The design highlights one link as the current section, which only means
+ * anything while the start page's sections are actually on screen. On a
+ * standalone page like /impressum/ it would falsely mark "Über uns" as where
+ * the reader is. Trailing slashes are stripped on both sides because `base`
+ * may be written with or without one.
+ */
+const strip = (path: string) => path.replace(/\/$/, '');
+const onHome = strip(Astro.url.pathname) === strip(home);
 ---
 
-{/* Watched by the observer below: once it scrolls out, the nav has lifted off. */}
+{
+  /* Watched by the observer below: once it scrolls out, the nav has lifted off. */
+}
 <div class="sentinel" aria-hidden="true"></div>
 
-<header class="nav">
+<header class:list={['nav', { 'is-home': onHome }]}>
   {/* The bar spans the viewport; only its contents are held to the column. */}
   <div class="nav-inner">
-    <a class="brand" href="#top">
-      <img src={beeUrl} alt="" width="34" height="36" />
-      <span>The Bumblebees</span>
+    <a class="brand" href={`${home}#top`}>
+      {/* Intrinsic sizes match each viewBox ratio, so the row reserves the right
+          box and nothing shifts as the two files load. The bee is decorative;
+          the wordmark's alt supplies the link's accessible name. */}
+      <img class="mark" src={beeUrl} alt="" width="37" height="36" />
+      <img class="wordmark" src={wordmarkUrl} alt="The Bumblebees" width="124" height="32" />
     </a>
 
-    <button class="toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+    <button
+      class="toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="nav-links"
+    >
       <span class="sr-only">Menü öffnen</span>
       <span class="bars" aria-hidden="true"></span>
     </button>
@@ -43,7 +82,9 @@ const links = [
   toggle?.addEventListener('click', () => {
     const open = toggle.getAttribute('aria-expanded') === 'true';
     toggle.setAttribute('aria-expanded', String(!open));
-    toggle.querySelector('.sr-only')!.textContent = open ? 'Menü öffnen' : 'Menü schließen';
+    toggle.querySelector('.sr-only')!.textContent = open
+      ? 'Menü öffnen'
+      : 'Menü schließen';
     header?.classList.toggle('is-open', !open);
   });
 
@@ -86,7 +127,9 @@ const links = [
     /* Transparent over the hero photo; .is-stuck fills it in once it detaches. */
     background: transparent;
     border-block-end: 1px solid transparent;
-    transition: background-color 0.25s ease, border-color 0.25s ease;
+    transition:
+      background-color 0.25s ease,
+      border-color 0.25s ease;
   }
 
   .nav-inner {
@@ -107,24 +150,41 @@ const links = [
     backdrop-filter: blur(10px);
   }
 
+  /* Two images now, so none of the old type properties apply here any more. */
   .brand {
     display: flex;
     align-items: center;
     gap: 14px;
-    font-family: var(--bb-display);
-    letter-spacing: 0.08em;
-    font-size: 17px;
-    text-transform: uppercase;
-    color: var(--bb-white);
-  }
-
-  .brand:hover {
-    color: var(--bb-white);
   }
 
   .brand img {
-    height: 36px;
     width: auto;
+  }
+
+  .mark {
+    height: 36px;
+  }
+
+  /*
+   * The wordmark face is much more condensed than the Anton text it replaces,
+   * so it is sized to match the old lockup width (~126px) rather than the old
+   * cap height, which would have looked undersized. Kept below the bee's 36px:
+   * the brand row must not grow, because --bb-nav-h is a fixed 80px that
+   * scroll-padding-top and the hero's negative margin both depend on.
+   */
+  .wordmark {
+    height: 32px;
+  }
+
+  /*
+   * Only the wordmark shrinks on narrow screens. The bee governs the row
+   * height, so shrinking it too would drop the nav below --bb-nav-h and pull
+   * the hero's negative margin out of alignment.
+   */
+  @media (max-width: 420px) {
+    .wordmark {
+      height: 26px;
+    }
   }
 
   .links {
@@ -141,8 +201,9 @@ const links = [
     color: var(--bb-nav);
   }
 
-  /* "Konzerte" is the active section in the design. */
-  .links a:first-child {
+  /* "Konzerte" is the active section in the design. Start page only — see the
+     frontmatter note on .is-home. */
+  .nav.is-home .links a:first-child {
     color: var(--bb-amber);
   }
 
@@ -166,7 +227,9 @@ const links = [
     width: 24px;
     height: 2px;
     background: var(--bb-white);
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
   }
 
   .bars::before,

@@ -26,14 +26,20 @@ const tiles = [
 <section class="bb-section" id="medien">
   <div class="bb-section-head">
     <h2>Galerie</h2>
-    <p class="bb-eyebrow">/ 02 — Fotos</p>
+    <p class="bb-eyebrow">Fotos</p>
   </div>
 
   <ul class="grid">
     {
       tiles.map(({ src, alt, span }) => (
         <li class={span}>
-          <Image src={src} alt={alt} widths={[400, 800, 1200]} sizes="(max-width: 720px) 100vw, 33vw" loading="lazy" />
+          <Image
+            src={src}
+            alt={alt}
+            widths={[400, 800, 1200]}
+            sizes="(max-width: 720px) 100vw, 33vw"
+            loading="lazy"
+          />
         </li>
       ))
     }

@@ -1,10 +1,18 @@
 ---
 const year = new Date().getFullYear();
+
+/*
+ * Same BASE_URL dance as the favicon in BaseLayout: Astro rewrites neither, and
+ * BASE_URL may or may not carry a trailing slash depending on how `base` is
+ * written — so strip it and add one back rather than concatenating blindly.
+ */
+const impressumHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/impressum/`;
 ---
 
 <footer class="footer">
   <div class="inner">
     <span>© {year} The Bumblebees</span>
+    <a href={impressumHref}>Impressum</a>
     <span>Live-Musik · Rock</span>
   </div>
 </footer>
@@ -28,5 +36,14 @@ const year = new Date().getFullYear();
     letter-spacing: 0.16em;
     color: #55555c;
     text-transform: uppercase;
+  }
+
+  /* The footer keeps its own muted tone rather than the global amber links. */
+  .inner a {
+    color: inherit;
+  }
+
+  .inner a:hover {
+    color: var(--bb-amber);
   }
 </style>

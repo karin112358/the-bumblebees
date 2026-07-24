@@ -1,30 +1,35 @@
 ---
+import { Image } from 'astro:assets';
+
 import { members } from '../data/members';
 
-/*
- * The handoff copy said "sechs Hobbymusiker" / "6 Mitglieder" while listing
- * seven instruments and shipping seven member cards. The count is derived here
- * so the prose can never drift from the grid again.
- */
-const count = members.length;
+import portraitPhoto from '../assets/images/band-2.jpg';
 ---
 
 <section class="about bb-section" id="ueber-uns">
   <div>
-    <p class="bb-eyebrow">/ 01 — Über uns</p>
+    <p class="bb-eyebrow">Über uns</p>
     <h2>Laut, eingespielt<br />und gemacht<br />für die Bühne.</h2>
     <p class="body">
-      Die Bumblebees sind {count} Hobbymusiker — Gesang, Gitarre, zwei Saxophone, Bass, Schlagzeug
-      und Klavier — die aus reiner Freude zusammenspielen und ein paar Konzerte im Jahr geben. Fette
-      Riffs, ein bisschen Bläser und eine Setlist, bei der der Spaß im Vordergrund steht.
+      Die Bumblebees sind Hobbymusiker — Gesang, Gitarre, Saxophone, Bass,
+      Schlagzeug und Klavier — die aus reiner Freude zusammenspielen und ein
+      paar Konzerte im Jahr geben. Fette Riffs, ein bisschen Bläser und eine
+      Setlist, bei der der Spaß im Vordergrund steht.
     </p>
     <p class="lineup">
-      {count} Mitglieder · Gesang, Gitarre, Saxophon (×2), Bass, Schlagzeug &amp; Klavier
+      Gesang, Gitarre, Saxophon, Bass, Schlagzeug &amp; Klavier
     </p>
   </div>
 
-  {/* TODO: no dedicated band portrait supplied — swap the striped slot for a photo. */}
-  <div class="portrait bb-placeholder">◹ Bandporträt</div>
+  <div class="portrait">
+    <Image
+      src={portraitPhoto}
+      alt="Die Bumblebees als Band"
+      widths={[480, 800, 960, 1600]}
+      sizes="(max-width: 860px) 92vw, 470px"
+      loading="lazy"
+    />
+  </div>
 </section>
 
 <style>
@@ -63,6 +68,12 @@ const count = members.length;
     height: 420px;
     border-radius: var(--bb-radius-lg);
     overflow: hidden;
+  }
+
+  .portrait :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   @media (max-width: 860px) {

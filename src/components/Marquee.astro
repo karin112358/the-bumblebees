@@ -1,15 +1,30 @@
 ---
-const phrase = 'Rockmusik ✦ Live ✦ The Bumblebees ✦ ';
+/*
+ * The black bee, not the amber one — this strip is amber. ?url rather than an
+ * SVG-component import matters here: the mark repeats once per copy, so
+ * inlining ~57 KB of path data would land in the HTML ten times over. As a URL
+ * it is one cached file no matter how many copies reference it.
+ */
+import beeBlackUrl from '../assets/logo/bee-black.svg?url';
 
-// The track scrolls to -50% and restarts, so the content must be exactly two
-// identical halves for the loop to be seamless.
-const half = phrase.repeat(2);
+const phrase = 'Rockmusik ✦ Live ✦ The Bumblebees';
+
+/*
+ * The strip loops by shifting left exactly one copy, then snapping back — so
+ * the remaining COPIES - 1 copies have to be wide enough to cover the viewport
+ * on their own. Otherwise a blank wedge sweeps through on every cycle, which is
+ * invisible on a phone and obvious on a desktop.
+ *
+ * One copy renders around 510px at the maximum font size, so 9 spare copies
+ * cover roughly 4590px — comfortably past any real browser window. The extra
+ * markup is a few hundred bytes.
+ */
+const COPIES = 10;
 ---
 
 <div class="marquee">
-  <div class="track" aria-hidden="true">
-    <span>{half}</span>
-    <span>{half}</span>
+  <div class="track" aria-hidden="true" style={`--copies:${COPIES}`}>
+    {Array.from({ length: COPIES }, () => <span>{phrase}</span>)}
   </div>
   <span class="sr-only">Rockmusik. Live. The Bumblebees.</span>
 </div>
@@ -24,7 +39,11 @@ const half = phrase.repeat(2);
   .track {
     display: flex;
     width: max-content;
-    animation: bb-marquee 22s linear infinite;
+    /*
+     * Duration is time-per-copy, not time-per-loop, so the scroll speed stays
+     * constant if COPIES ever changes.
+     */
+    animation: bb-marquee 11s linear infinite;
     font-family: var(--bb-display);
     font-size: clamp(20px, 3vw, 26px);
     letter-spacing: 0.06em;
@@ -34,7 +53,23 @@ const half = phrase.repeat(2);
   }
 
   .track span {
-    padding: 0 22px;
+    padding: 0 44px;
+    /* Copies must stay equal width for the shift to land seamlessly. */
+    flex: none;
+    /* inline-flex so the bee sits on the text's optical centre rather than the
+       baseline, where it would hang below the caps. */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+  }
+
+  /*
+   * Sized in em so it tracks the clamped font size. 1.25em keeps it inside the
+   * existing line box, so adding it does not change the strip's height.
+   */
+  .track img {
+    height: 1.25em;
+    width: auto;
   }
 
   @keyframes bb-marquee {
@@ -42,7 +77,9 @@ const half = phrase.repeat(2);
       transform: translateX(0);
     }
     to {
-      transform: translateX(-50%);
+      /* A translateX percentage resolves against the track's own width, so
+         dividing by the copy count shifts by exactly one copy. */
+      transform: translateX(calc(-100% / var(--copies)));
     }
   }
 
