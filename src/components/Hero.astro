@@ -10,7 +10,7 @@ import heroPhoto from '../assets/images/band-1.jpg';
     class="photo"
     src={heroPhoto}
     alt="Die Bumblebees live auf der Bühne"
-    widths={[760, 1180, 1693]}
+    widths={[640, 960, 1280, 1693]}
     sizes="100vw"
     loading="eager"
     fetchpriority="high"
@@ -35,8 +35,20 @@ import heroPhoto from '../assets/images/band-1.jpg';
 <style>
   .hero {
     position: relative;
-    /* 720px in the prototype; shrinks toward the handoff's ~520px on phones. */
-    height: clamp(520px, 62vw, 720px);
+    /*
+     * svh, not vh or dvh: vh would hide the bottom of the hero under mobile
+     * browser chrome, and dvh would resize the whole section as that chrome
+     * hides on scroll.
+     */
+    height: 100svh;
+    /* Floor for short landscape phones, where 100svh gets very shallow. */
+    min-height: 520px;
+    /*
+     * Pull the hero up under the sticky nav so the photo starts at y=0 and
+     * fills exactly one viewport. Without this the nav's 80px band would push
+     * the hero down and the last 80px would sit below the fold.
+     */
+    margin-block-start: calc(-1 * var(--bb-nav-h));
     overflow: hidden;
   }
 
@@ -62,7 +74,14 @@ import heroPhoto from '../assets/images/band-1.jpg';
   .scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(11, 11, 13, 0.35), rgba(11, 11, 13, 0.85));
+    background:
+      /*
+       * The nav now sits over the photo rather than on the panel, so the top of
+       * the frame needs its own darkening for the white and amber nav text to
+       * stay legible against a bright stage shot.
+       */
+      linear-gradient(180deg, rgba(11, 11, 13, 0.7), transparent 22%),
+      linear-gradient(180deg, rgba(11, 11, 13, 0.35), rgba(11, 11, 13, 0.85));
   }
 
   .content {

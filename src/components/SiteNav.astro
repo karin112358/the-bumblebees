@@ -18,19 +18,22 @@ const links = [
 <div class="sentinel" aria-hidden="true"></div>
 
 <header class="nav">
-  <a class="brand" href="#top">
-    <img src={beeUrl} alt="" width="34" height="36" />
-    <span>The Bumblebees</span>
-  </a>
+  {/* The bar spans the viewport; only its contents are held to the column. */}
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <img src={beeUrl} alt="" width="34" height="36" />
+      <span>The Bumblebees</span>
+    </a>
 
-  <button class="toggle" type="button" aria-expanded="false" aria-controls="nav-links">
-    <span class="sr-only">Menü öffnen</span>
-    <span class="bars" aria-hidden="true"></span>
-  </button>
+    <button class="toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+      <span class="sr-only">Menü öffnen</span>
+      <span class="bars" aria-hidden="true"></span>
+    </button>
 
-  <nav id="nav-links" class="links" aria-label="Hauptnavigation">
-    {links.map(({ href, label }) => <a href={href}>{label}</a>)}
-  </nav>
+    <nav id="nav-links" class="links" aria-label="Hauptnavigation">
+      {links.map(({ href, label }) => <a href={href}>{label}</a>)}
+    </nav>
+  </div>
 </header>
 
 <script>
@@ -80,6 +83,13 @@ const links = [
     position: sticky;
     top: 0;
     z-index: 30;
+    /* Transparent over the hero photo; .is-stuck fills it in once it detaches. */
+    background: transparent;
+    border-block-end: 1px solid transparent;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+
+  .nav-inner {
     max-inline-size: var(--bb-max);
     margin-inline: auto;
     display: flex;
@@ -87,10 +97,6 @@ const links = [
     justify-content: space-between;
     gap: 16px;
     padding: 22px clamp(20px, 3.4vw, 40px);
-    /* At rest it sits on the panel; .is-stuck fills it in once it overlays content. */
-    background: transparent;
-    border-block-end: 1px solid transparent;
-    transition: background-color 0.25s ease, border-color 0.25s ease;
   }
 
   .nav.is-stuck,

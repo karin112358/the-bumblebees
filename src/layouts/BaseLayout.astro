@@ -70,15 +70,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       }
 
       /*
-       * No overflow clip here: it would trap the sticky nav, since sticky
-       * resolves against the nearest clipping ancestor rather than the
-       * viewport. The three sections that actually bleed — hero, marquee and
-       * the booking watermark — each clip themselves instead.
+       * The shell spans the viewport and owns only the panel colour. Width is
+       * capped per component (.nav-inner, .bb-section, .booking .inner, the
+       * footer's .inner), which lets the hero, marquee and booking bands run
+       * edge to edge without any 100vw breakout — and so without the horizontal
+       * overflow that 100vw causes once a scrollbar is present.
+       *
+       * No overflow clip here either: it would trap the sticky nav, since
+       * sticky resolves against the nearest clipping ancestor rather than the
+       * viewport. The three bands that bleed each clip themselves instead.
        */
       .shell {
         position: relative;
-        max-inline-size: var(--bb-max);
-        margin-inline: auto;
         background: var(--bb-panel);
       }
     </style>
