@@ -27,7 +27,7 @@ const home = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
 const links = [
   { hash: '#ueber-uns', label: 'Über uns' },
   { hash: '#medien', label: 'Galerie' },
-  { hash: '#video', label: 'Videos' },
+  { hash: '#video', label: 'Video' },
   { hash: '#konzerte', label: 'Konzerte' },
   { hash: '#buchen', label: 'Buchen' },
 ].map(({ hash, label }) => ({ href: `${home}${hash}`, label }));
@@ -52,11 +52,19 @@ const onHome = strip(Astro.url.pathname) === strip(home);
   {/* The bar spans the viewport; only its contents are held to the column. */}
   <div class="nav-inner">
     <a class="brand" href={`${home}#top`}>
-      {/* Intrinsic sizes match each viewBox ratio, so the row reserves the right
+      {
+        /* Intrinsic sizes match each viewBox ratio, so the row reserves the right
           box and nothing shifts as the two files load. The bee is decorative;
-          the wordmark's alt supplies the link's accessible name. */}
+          the wordmark's alt supplies the link's accessible name. */
+      }
       <img class="mark" src={beeUrl} alt="" width="37" height="36" />
-      <img class="wordmark" src={wordmarkUrl} alt="The Bumblebees" width="124" height="32" />
+      <img
+        class="wordmark"
+        src={wordmarkUrl}
+        alt="The Bumblebees"
+        width="124"
+        height="32"
+      />
     </a>
 
     <button
