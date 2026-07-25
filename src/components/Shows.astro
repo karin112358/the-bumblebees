@@ -20,6 +20,7 @@ const { upcoming } = await getShows();
       <ol class="list">
         {upcoming.map((show, i) => {
           const { weekday, day, month } = formatShowDate(show.data.date);
+          const time = show.data.time;
           const tag = show.data.soldOut ? 'Ausverkauft' : show.data.note;
 
           return (
@@ -36,6 +37,7 @@ const { upcoming } = await getShows();
                   {show.data.city}
                   {show.data.country && `, ${show.data.country}`}
                 </p>
+                {time && <p class="time">Beginn {time} Uhr</p>}
               </div>
 
               {show.data.ticketUrl && !show.data.soldOut ? (
@@ -106,6 +108,15 @@ const { upcoming } = await getShows();
   .place {
     font-size: 13px;
     color: var(--bb-muted);
+  }
+
+  .time {
+    font-family: var(--bb-condensed);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--bb-amber);
+    margin-block-start: 4px;
   }
 
   .tag {

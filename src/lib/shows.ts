@@ -13,9 +13,10 @@ export async function getShows() {
   const all = await getCollection('shows');
 
   // Day boundary rather than the current instant, so a show doesn't move to
-  // "past" while the band is still on stage.
+  // "past" while the band is still on stage. Local midnight, to match the show
+  // dates, which the schema builds in local time.
   const cutoff = new Date();
-  cutoff.setUTCHours(0, 0, 0, 0);
+  cutoff.setHours(0, 0, 0, 0);
 
   const upcoming = all
     .filter((s) => s.data.date >= cutoff)
@@ -29,9 +30,6 @@ export async function getShows() {
 }
 
 /*
- * Dates in YAML parse to UTC midnight, so they must be formatted in UTC too —
- * otherwise they render a day early anywhere west of Greenwich.
- *
  * de-AT rather than de-DE: the band is Upper Austrian, and the two differ on
  * month names (Jänner/Januar) even though the abbreviations here happen to match.
  */
@@ -40,10 +38,13 @@ const LOCALE = 'de-AT';
 /**
  * The design splits each date across two lines — "FR 28" above, "AUG" below —
  * so the parts are returned separately rather than as one formatted string.
+ *
+ * The schema builds each date in local time, so it is formatted in local time
+ * too (no timeZone override) — the day and month then read back as written.
  */
 export function formatShowDate(date: Date) {
   const part = (options: Intl.DateTimeFormatOptions) =>
-    date.toLocaleDateString(LOCALE, { timeZone: 'UTC', ...options });
+    date.toLocaleDateString(LOCALE, options);
 
   return {
     // "Fr" / "So" — uppercased to match the display face.
@@ -54,7 +55,12 @@ export function formatShowDate(date: Date) {
   };
 }
 
-/** Machine-readable value for <time datetime="…">. */
+/**
+ * Machine-readable "YYYY-MM-DD" for <time datetime="…">, from the local date
+ * parts — not toISOString(), which would shift to UTC and can land on the
+ * previous day.
+ */
 export function isoDate(date: Date) {
-  return date.toISOString().slice(0, 10);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }

@@ -2,7 +2,7 @@
 #
 # Neuen Termin anlegen: Eintrag unten anhängen. Schema in src/content.config.ts.
 #
-# Pflicht:  id (eindeutig), date (JJJJ-MM-TT), venue, city
+# Pflicht:  id (eindeutig), date (JJJJ-MM-TT, optional mit Uhrzeit "JJJJ-MM-TT HH:MM"), venue, city
 # Optional: country, ticketUrl, soldOut (Standard false), note
 #
 # `note` wird im Design als Tag rechts in der Zeile gerendert, z. B. "Eintritt frei".
