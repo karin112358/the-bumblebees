@@ -1,10 +1,19 @@
 ---
+import { Image } from 'astro:assets';
+
+import coverImage from '../assets/images/video-cover/2026-07-11-sierning-cover.jpg';
+import beeUrl from '../assets/logo/bee.svg?url';
+import wordmarkUrl from '../assets/logo/wordmark.svg?url';
+
 /*
- * No clip supplied yet. The design specifies a placeholder block with a play
- * button, so this renders as a non-interactive panel rather than a dead button —
- * there is nothing to press. Swap the whole .stage div for an <iframe> or
- * <video> once there is a real clip.
+ * The clip lives on YouTube (privacy-enhanced -nocookie host). It is only
+ * embedded on the first click, so no YouTube script or cookie loads until then.
+ * autoplay=1 starts it once the iframe is swapped in for the poster.
  */
+const embedSrc =
+  'https://www.youtube-nocookie.com/embed/33XQZg2YYDY?autoplay=1&rel=0';
+
+const duration = '2:46';
 ---
 
 <section class="bb-section" id="video">
@@ -13,72 +22,231 @@
     <p class="bb-eyebrow">Video</p>
   </div>
 
-  <div class="stage">
-    <div class="wash" aria-hidden="true"></div>
-    <div class="inner">
-      <span class="play" aria-hidden="true"></span>
-      <p class="caption">◹ Live-Video — Hauptclip</p>
-    </div>
+  {/*
+    A click-to-play facade rather than an always-on iframe: nothing is loaded
+    from YouTube until someone presses play. The button carries the embed URL;
+    the script swaps in the <iframe> on the first press.
+  */}
+  <div class="stage" data-video-stage>
+    <button class="poster" type="button" data-embed-src={embedSrc} aria-label="Live-Video abspielen">
+      <Image
+        class="cover"
+        src={coverImage}
+        alt="Die Bumblebees live in Sierning"
+        widths={[480, 640, 960]}
+        sizes="(max-width: 860px) 92vw, 1180px"
+        loading="lazy"
+      />
+      <span class="wash" aria-hidden="true"></span>
+
+      <span class="play" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+          <path d="M8 5v14l11-7z" fill="currentColor" />
+        </svg>
+      </span>
+
+      <span class="meta" aria-hidden="true">
+        <img class="bee" src={beeUrl} alt="" width="34" height="34" />
+        <img class="wordmark" src={wordmarkUrl} alt="" width="150" height="38" />
+        <span class="live">Live · 2026</span>
+      </span>
+
+      <span class="duration" aria-hidden="true">{duration}</span>
+    </button>
   </div>
 </section>
+
+<script>
+  /*
+   * On the first click, replace the poster button with the YouTube iframe.
+   * Nothing is loaded from YouTube before this point.
+   */
+  for (const stage of document.querySelectorAll<HTMLElement>('[data-video-stage]')) {
+    const poster = stage.querySelector<HTMLButtonElement>('.poster');
+    poster?.addEventListener(
+      'click',
+      () => {
+        const src = poster.dataset.embedSrc;
+        if (!src) return;
+
+        const iframe = document.createElement('iframe');
+        iframe.src = src;
+        iframe.title = 'The Bumblebees — Live-Video';
+        iframe.className = 'clip';
+        iframe.allow =
+          'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+        iframe.allowFullscreen = true;
+
+        poster.replaceWith(iframe);
+      },
+      { once: true },
+    );
+  }
+</script>
 
 <style>
   .stage {
     position: relative;
-    height: clamp(240px, 42vw, 440px);
+    aspect-ratio: 16 / 9;
     border-radius: var(--bb-radius-lg);
     overflow: hidden;
-    background: var(--bb-stripes);
     border: 1px solid var(--bb-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: var(--bb-panel);
   }
 
+  /*
+   * The hover state is driven through these custom properties, set on the
+   * poster and read by .wash / .play via var(). Two reasons it is done this way:
+   *
+   *  - The obvious `.poster:hover .wash { ... }` gets miscompiled: the CSS
+   *    minifier drops the redundant `.poster` ancestor (every .wash/.play lives
+   *    inside a .poster) but discards the `:hover` with it, baking the hover
+   *    look in permanently. Keeping `:hover` on the poster itself avoids that.
+   *
+   *  - They are registered with @property so they can be *transitioned*. An
+   *    unregistered custom property changing on an ancestor updates the child's
+   *    value instantly — the child's own `transition` never fires, so the change
+   *    jumps. Animating the registered property on the poster interpolates it
+   *    frame by frame, and the children reading it follow smoothly.
+   */
+  @property --wash-opacity {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
+  }
+  @property --play-scale {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
+  }
+  @property --play-bg {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #f3c814;
+  }
+
+  /* The poster fills the stage and is the click target. */
+  .poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    display: block;
+
+    --wash-opacity: 1;
+    --play-scale: 1;
+    --play-bg: var(--bb-amber);
+    transition:
+      --wash-opacity 0.7s ease-out,
+      --play-scale 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
+      --play-bg 0.7s ease-out;
+  }
+
+  .poster:hover,
+  .poster:focus-visible {
+    --wash-opacity: 0.6;
+    --play-scale: 1.06;
+    --play-bg: var(--bb-amber-bright, #ffd21f);
+  }
+
+  .cover,
+  .poster :global(img.cover) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* A soft darkening so the yellow button and the corner marks stay legible. */
   .wash {
     position: absolute;
     inset: 0;
-    background: radial-gradient(
-      circle at 50% 50%,
-      rgba(244, 178, 35, 0.14),
-      transparent 60%
-    );
+    background:
+      radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.4)),
+      linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent 45%);
+    /* Lifts on hover to hint the poster is interactive — see .poster vars. */
+    opacity: var(--wash-opacity);
   }
 
-  .inner {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
+  .bee {
+    width: clamp(44px, 5vw, 58px);
+    height: auto;
+    opacity: 0.9;
   }
 
   .play {
-    width: 74px;
-    height: 74px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(var(--play-scale));
+    width: clamp(58px, 7vw, 74px);
+    height: clamp(58px, 7vw, 74px);
     border-radius: 50%;
-    background: var(--bb-amber);
+    background: var(--play-bg);
+    color: var(--bb-panel);
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  /* Triangle drawn from borders, nudged right to sit optically centred. */
-  .play::after {
-    content: '';
-    width: 0;
-    height: 0;
-    border-left: 22px solid var(--bb-panel);
-    border-block: 13px solid transparent;
-    margin-inline-start: 5px;
+  /* Nudge the glyph right so it sits optically centred in the disc. */
+  .play svg {
+    margin-inline-start: 3px;
   }
 
-  .caption {
+  .poster:focus-visible {
+    outline: 2px solid var(--bb-amber);
+    outline-offset: -4px;
+  }
+
+  .meta {
+    position: absolute;
+    left: 20px;
+    bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    /* Centre the bee over the wordmark (the widest item in the stack). */
+    align-items: center;
+    gap: 8px;
+  }
+
+  .wordmark {
+    width: clamp(112px, 14vw, 150px);
+    height: auto;
+  }
+
+  .live {
     font-family: var(--bb-mono);
-    font-size: 12px;
-    letter-spacing: 0.16em;
-    color: var(--bb-muted);
+    font-size: 11px;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    text-align: center;
+    color: var(--bb-amber);
+  }
+
+  .duration {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    font-family: var(--bb-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--bb-white);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+
+  .clip,
+  .stage :global(iframe.clip) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #000;
   }
 </style>

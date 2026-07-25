@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 
 import Wordmark from '../assets/logo/wordmark.svg';
-import heroPhoto from '../assets/images/band-1.jpg';
+import heroPhoto from '../assets/images/band-1.jpeg';
 ---
 
 <section class="hero" id="top">
@@ -89,6 +89,12 @@ import heroPhoto from '../assets/images/band-1.jpg';
        * stay legible against a bright stage shot.
        */
       linear-gradient(180deg, rgba(11, 11, 13, 0.7), transparent 22%),
+      /*
+       * Extra darkening over the bottom third, where the audience's heads sit —
+       * sinks that busy silhouette so it doesn't compete with the wordmark and
+       * buttons that overlay the same area.
+       */
+      linear-gradient(0deg, rgba(11, 11, 13, 0.96), transparent 70%),
       linear-gradient(180deg, rgba(11, 11, 13, 0.35), rgba(11, 11, 13, 0.85));
   }
 

@@ -2,7 +2,7 @@ import type { ImageMetadata } from 'astro';
 
 import birgit from '../assets/members/birgit.jpg';
 import carina from '../assets/members/carina.jpg';
-import harald from '../assets/members/harald.jpg';
+import harald from '../assets/members/harald-2.jpg';
 import karin from '../assets/members/karin.jpg';
 import martin from '../assets/members/martin.jpg';
 import wolfgang from '../assets/members/wolfgang.jpg';

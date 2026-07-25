@@ -11,17 +11,17 @@
 # Vergangen/kommend wird beim Build aus `date` abgeleitet — siehe src/lib/shows.ts.
 
 - id: soundplatz-rohr-2026
-  date: 2026-08-28
+  date: 2026-08-28 18:00
   venue: Soundplatz Rohr
-  city: Rohr
+  city: Ortsplatz, 4532 Rohr
   country: Oberösterreich
   soldOut: false
   note: Eintritt frei
 
 - id: erntedankfest-bad-hall-2026
-  date: 2026-09-27
+  date: 2026-09-27 16:00
   venue: Erntedankfest
-  city: Bad Hall
+  city: Schloss Cafe Bar Sierning, Kirchenplatz 1a, 4522 Sierning
   country: Oberösterreich
   soldOut: false
   note: Eintritt frei
