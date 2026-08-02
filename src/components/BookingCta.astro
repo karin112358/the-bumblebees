@@ -1,70 +1,91 @@
 ---
+import InstagramIcon from './icons/Instagram.astro';
+
+import { instagramUrl, handle } from '../data/social';
+
 // TODO: confirm this mailbox actually exists. The local part is unchanged from
 // the handoff; only the domain was corrected to the real one (.at, not .band).
 // Mirrored in src/pages/impressum.astro — keep the two in step.
 const email = 'booking@thebumblebees.at';
-const instagram = 'https://www.instagram.com/bumblebeestheband';
 ---
 
 <section class="booking" id="buchen">
-  <span class="watermark" aria-hidden="true">Book</span>
-
   <div class="inner">
-    <p class="eyebrow">Band buchen</p>
-    <h2>Holt euch die Bumblebees auf eure Bühne.</h2>
-    <p class="body">
-      Ihr plant ein Fest, eine Firmenveranstaltung, einen Musikabend oder ein
-      anderes Event, bei dem handgemachte Rockmusik nicht fehlen darf?
-    </p>
-    <p class="body">
-      Wir bieten rund zwei Stunden Rock, Funk, Soul und Pop, auf Wunsch
-      aufgeteilt auf mehrere Sets. Schreibt uns, wann und wo eure Veranstaltung
-      stattfindet, wie groß sie ungefähr ist und welche Spielzeit ihr euch
-      vorstellt. Wir melden uns mit den wichtigsten Informationen zu
-      Verfügbarkeit, Technik und Konditionen.
-    </p>
-
-    <div class="actions">
-      <a class="btn solid" href={`mailto:${email}`}>{email}</a>
-      <a class="btn outline" href={instagram} target="_blank" rel="noopener"
-        >@bumblebeestheband</a
-      >
+    <div class="pitch">
+      <p class="eyebrow">Band buchen</p>
+      <h2>Holt euch die Bumblebees auf eure Bühne.</h2>
+      <p class="body">
+        Ihr plant ein Fest, eine Firmenveranstaltung, einen Musikabend oder ein
+        anderes Event, bei dem handgemachte Rockmusik nicht fehlen darf?
+      </p>
+      {/*
+        The "tell us date, size and playing time" half of this paragraph now
+        lives in the card as a list — saying it in both places is what made the
+        old block feel repetitive.
+      */}
+      <p class="body">
+        Wir bieten rund zwei Stunden Rock, Funk, Soul und Pop, auf Wunsch
+        aufgeteilt auf mehrere Sets. Wir melden uns mit den wichtigsten
+        Informationen zu Verfügbarkeit, Technik und Konditionen.
+      </p>
     </div>
 
-    <p class="body">
-      Einen aktuellen Eindruck von unseren Auftritten findet ihr auch auf
-      Instagram: <a href={instagram} target="_blank" rel="noopener"
-        >@bumblebeestheband</a
-      >
-    </p>
+    {/*
+      One action, not two. The old layout put the e-mail button and an Instagram
+      button side by side as if they were equivalent — one is the actual enquiry,
+      the other a detour. Instagram is now a quiet line at the foot of the card,
+      and it appears once instead of twice.
+    */}
+    <div class="card">
+      <h3>Anfrage</h3>
+
+      <a class="btn" href={`mailto:${email}`}>{email}</a>
+
+      <p class="hint">Damit wir schnell antworten können, schreibt uns dazu:</p>
+      <ul class="checklist">
+        <li>Datum und Ort</li>
+        <li>Ungefähre Größe der Veranstaltung</li>
+        <li>Gewünschte Spielzeit</li>
+      </ul>
+
+      {/*
+        The visible text carries the whole accessible name on purpose — an
+        aria-label naming Instagram while the link reads "@bumblebeestheband"
+        would break WCAG 2.5.3 (Label in Name).
+      */}
+      <p class="social">
+        <a href={instagramUrl} target="_blank" rel="noopener">
+          <InstagramIcon size={16} />
+          <span>{handle} auf Instagram</span>
+        </a>
+      </p>
+    </div>
   </div>
 </section>
 
 <style>
+  /*
+   * No `position: relative` or `overflow: hidden` here any more: both existed
+   * only to anchor and clip the "Booking" watermark, which is gone. Nothing in
+   * the section bleeds past its edges now.
+   */
   .booking {
-    position: relative;
     background: var(--bb-amber);
-    overflow: hidden;
     padding: var(--bb-section-y) 0;
   }
 
+  /*
+   * Same two-column shape as About.astro — one grid pattern for the page rather
+   * than a second one just for this block.
+   */
   .inner {
-    position: relative;
     max-inline-size: var(--bb-max);
     margin-inline: auto;
     padding-inline: var(--bb-gutter);
-  }
-
-  .watermark {
-    position: absolute;
-    right: -40px;
-    bottom: -60px;
-    font-family: var(--bb-display);
-    font-size: clamp(120px, 22vw, 220px);
-    color: rgba(11, 11, 13, 0.06);
-    line-height: 0.8;
-    text-transform: uppercase;
-    pointer-events: none;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(32px, 5vw, 56px);
+    align-items: center;
   }
 
   /* Inverted against the amber panel, so not the shared .bb-eyebrow. */
@@ -77,9 +98,15 @@ const instagram = 'https://www.instagram.com/bumblebeestheband';
     margin-block-end: 16px;
   }
 
+  /*
+   * 1.02 rather than the 0.94 this used to carry. At 0.94 the umlaut dots of
+   * "BÜHNE" collided with the line above — uppercase diacritics sit higher than
+   * the cap height, and German headings here will always have some. The look is
+   * still tight, just not broken.
+   */
   h2 {
     font-size: clamp(36px, 6.4vw, 60px);
-    line-height: 0.94;
+    line-height: 1.02;
     color: var(--bb-panel);
     max-inline-size: 640px;
   }
@@ -104,73 +131,125 @@ const instagram = 'https://www.instagram.com/bumblebeestheband';
     margin-block-start: 1.1em;
   }
 
-  .actions + .body {
-    margin-block-start: 28px;
+  .card {
+    background: var(--bb-panel);
+    border-radius: var(--bb-radius-lg);
+    padding: clamp(24px, 3.5vw, 40px);
+  }
+
+  /* A mono label, not the global Anton caps — h3 is for the heading order. */
+  .card h3 {
+    font-family: var(--bb-mono);
+    font-size: 12px;
+    letter-spacing: 0.24em;
+    color: var(--bb-amber);
+    line-height: 1;
   }
 
   /*
-   * Without this the global `a { color: var(--bb-amber) }` paints the link the
-   * exact colour of the panel behind it. Colour alone no longer distinguishes it
-   * from the surrounding text either, so it carries an underline.
+   * Inverted against the button on the amber panel: there it is a dark block on
+   * yellow, here a yellow block on dark. Same relationship as the confirm button
+   * in VideoSection's consent notice.
    */
-  .body a {
-    color: var(--bb-panel);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-    text-decoration-thickness: 1px;
-  }
-
-  .body a:hover {
-    color: var(--bb-panel);
-    text-decoration-thickness: 2px;
-  }
-
-  .actions {
-    display: flex;
-    gap: 14px;
-    margin-block-start: 34px;
-    flex-wrap: wrap;
-  }
-
   .btn {
+    display: block;
+    text-align: center;
+    margin-block-start: 22px;
     font-family: var(--bb-condensed);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     font-size: 16px;
-    padding: 16px 30px;
+    padding: 16px 20px;
     border-radius: var(--bb-radius-btn);
-    transition:
-      transform 0.15s ease,
-      opacity 0.15s ease;
+    background: var(--bb-amber);
+    color: var(--bb-panel);
     /* The address is long enough to overflow a phone otherwise. */
     overflow-wrap: anywhere;
+    transition:
+      transform 0.15s ease,
+      background 0.15s ease;
   }
 
+  /* Needs its own colour: the global a:hover would repaint the label amber. */
   .btn:hover {
+    background: var(--bb-amber-hover);
+    color: var(--bb-panel);
     transform: translateY(-2px);
   }
 
-  .solid {
-    background: var(--bb-panel);
+  .hint {
+    margin-block-start: 26px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--bb-muted);
+  }
+
+  .checklist {
+    margin-block-start: 14px;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+  }
+
+  .checklist li {
+    position: relative;
+    padding-inline-start: 18px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--bb-white);
+  }
+
+  /* An amber dot rather than a list marker, to match the section's accents. */
+  .checklist li::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0.72em;
+    inset-inline-start: 0;
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 50%;
+    background: var(--bb-amber);
+    transform: translateY(-50%);
+  }
+
+  .social {
+    margin-block-start: 28px;
+    padding-block-start: 20px;
+    border-block-start: 1px solid var(--bb-border);
+  }
+
+  .social a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--bb-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--bb-muted);
+  }
+
+  .social a:hover {
     color: var(--bb-amber);
-  }
-
-  .solid:hover {
-    color: var(--bb-amber-hover);
-  }
-
-  .outline {
-    border: 2px solid var(--bb-panel);
-    color: var(--bb-panel);
-  }
-
-  .outline:hover {
-    color: var(--bb-panel);
-    opacity: 0.75;
   }
 
   .booking :focus-visible {
     outline-color: var(--bb-panel);
+  }
+
+  /*
+   * Must follow the rule above — same specificity, so source order decides.
+   * Inside the dark card a panel-coloured ring is invisible, and that is exactly
+   * where the only action of the section sits.
+   */
+  .card :focus-visible {
+    outline-color: var(--bb-amber);
+  }
+
+  @media (max-width: 860px) {
+    .inner {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

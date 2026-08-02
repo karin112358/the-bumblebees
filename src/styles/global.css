@@ -1,4 +1,30 @@
 /*
+ * Fonts are self-hosted rather than pulled from fonts.googleapis.com. Loading
+ * them from Google's CDN sends every visitor's IP address to Google in the US
+ * on page load, with no consent and no way to opt out — the single most
+ * frequently warned-about GDPR defect on German-language sites. Bundling them
+ * also means the site contacts no third party at all on a normal page view,
+ * which is what lets the privacy notice say so and skip a cookie banner.
+ *
+ * Only the subsets and weights actually used are imported. `latin` covers the
+ * umlauts and ß that German needs; latin-ext, greek, cyrillic and vietnamese
+ * are left out. Barlow Condensed is used at 400, 600 and 700 only — the 500
+ * that was in the old Google URL was never applied anywhere.
+ *
+ * The two variable families ship a single file spanning their whole weight
+ * range, so they need one import each. Their family name carries a "Variable"
+ * suffix, hence the changed font stacks below.
+ *
+ * @import has to precede every rule in the file, so these stay at the top.
+ */
+@import '@fontsource/anton/latin-400.css';
+@import '@fontsource/barlow-condensed/latin-400.css';
+@import '@fontsource/barlow-condensed/latin-600.css';
+@import '@fontsource/barlow-condensed/latin-700.css';
+@import '@fontsource-variable/manrope/wght.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
+
+/*
  * The one global stylesheet. Imported once, in BaseLayout.astro.
  *
  * Plain .css imports are never scoped by Astro — only <style> blocks inside
@@ -35,10 +61,15 @@
   --bb-border-row: #2c2c33;
   --bb-border-tag: #3a3a41;
 
+  /*
+   * The two variable families register under a "… Variable" name, so that goes
+   * first; the plain name stays behind it as a fallback for anyone who happens
+   * to have the static font installed locally.
+   */
   --bb-display: 'Anton', Impact, sans-serif;
   --bb-condensed: 'Barlow Condensed', 'Arial Narrow', sans-serif;
-  --bb-body: 'Manrope', system-ui, sans-serif;
-  --bb-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --bb-body: 'Manrope Variable', 'Manrope', system-ui, sans-serif;
+  --bb-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
 
   /*
    * The prototype is a fixed 1180px column with flat 44px side padding. Below

@@ -1,0 +1,21 @@
+---
+/*
+ * See Instagram.astro for why this is inline and hidden from assistive tech.
+ *
+ * The default size is larger than Instagram's on purpose: the YouTube mark is
+ * drawn wide and short, so matching the two nominally would leave it looking
+ * smaller than the Instagram square next to it.
+ */
+interface Props {
+  size?: number;
+}
+
+const { size = 19 } = Astro.props;
+---
+
+<svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" focusable="false">
+  <path
+    fill="currentColor"
+    d="M23.5 6.51a3.02 3.02 0 0 0-2.12-2.14C19.5 3.86 12 3.86 12 3.86s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.51C0 8.4 0 12.35 0 12.35s0 3.95.5 5.84a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14c.5-1.89.5-5.84.5-5.84s0-3.95-.5-5.84ZM9.55 15.93V8.77l6.27 3.58-6.27 3.58Z"
+  />
+</svg>

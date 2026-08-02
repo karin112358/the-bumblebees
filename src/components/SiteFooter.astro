@@ -1,4 +1,9 @@
 ---
+import InstagramIcon from './icons/Instagram.astro';
+import YouTubeIcon from './icons/YouTube.astro';
+
+import { instagramUrl, youtubeUrl } from '../data/social';
+
 const year = new Date().getFullYear();
 
 /*
@@ -6,14 +11,54 @@ const year = new Date().getFullYear();
  * BASE_URL may or may not carry a trailing slash depending on how `base` is
  * written — so strip it and add one back rather than concatenating blindly.
  */
-const impressumHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/impressum/`;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const impressumHref = `${base}/impressum/`;
+const datenschutzHref = `${base}/datenschutz/`;
 ---
 
+{/*
+  Both legal pages are linked from here rather than from the nav, which is what
+  makes them reachable in one click from every page — Art. 12 Abs 1 DSGVO
+  requires the privacy notice to be easily accessible, and § 25 MedienG the
+  same for the imprint.
+*/}
 <footer class="footer">
   <div class="inner">
     <span>© {year} The Bumblebees</span>
     <a href={impressumHref}>Impressum</a>
-    <span>Live-Musik · Rock</span>
+    <a href={datenschutzHref}>Datenschutz</a>
+
+    {/*
+      Plain outbound links, deliberately: no Meta or Google plugin, no button
+      widget, no pixel. Nothing is requested from either platform until someone
+      clicks. The icons are drawn inline for the same reason — pulling them from
+      an icon CDN would hand every visitor's IP to a third party on page load,
+      which is exactly what self-hosting the fonts got rid of.
+
+      The <a> carries the accessible name because its only content is a graphic;
+      the <svg> is hidden from assistive tech so the name is not doubled.
+    */}
+    <span class="social">
+      <a
+        class="icon"
+        href={instagramUrl}
+        target="_blank"
+        rel="noopener"
+        aria-label="The Bumblebees auf Instagram"
+      >
+        <InstagramIcon size={17} />
+      </a>
+
+      <a
+        class="icon"
+        href={youtubeUrl}
+        target="_blank"
+        rel="noopener"
+        aria-label="The Bumblebees auf YouTube"
+      >
+        <YouTubeIcon size={19} />
+      </a>
+    </span>
   </div>
 </footer>
 
@@ -45,5 +90,38 @@ const impressumHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/impressum/
 
   .inner a:hover {
     color: var(--bb-amber);
+  }
+
+  /* Keeps the two icons together as one unit when the row wraps on a phone. */
+  .social {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /*
+   * The footer runs at 11px, so the glyph alone would be far too small a target.
+   * inline-flex plus padding gets each link to 33px — comfortably past the
+   * 24x24 minimum in WCAG 2.2 (2.5.8). The negative margin keeps that padding
+   * from making the footer visibly taller than it was.
+   *
+   * No colour of its own: the SVG paths use currentColor, so the .inner a rules
+   * above already give these the muted tone and the amber hover.
+   */
+  .icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /*
+     * A fixed box rather than padding around the glyph: the YouTube mark is
+     * drawn wider and shorter than the Instagram square, so the two SVGs differ
+     * in size on purpose (optical, not nominal, matching). Without this the
+     * two hit areas would differ by 2px and sit a pixel off from each other.
+     */
+    inline-size: 33px;
+    block-size: 33px;
+    /* Keeps the tap area from making the footer visibly taller than its text. */
+    margin-block: -8px;
+    border-radius: var(--bb-radius-btn);
   }
 </style>

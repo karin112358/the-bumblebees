@@ -6,14 +6,27 @@ import beeUrl from '../assets/logo/bee.svg?url';
 import wordmarkUrl from '../assets/logo/wordmark.svg?url';
 
 /*
- * The clip lives on YouTube (privacy-enhanced -nocookie host). It is only
- * embedded on the first click, so no YouTube script or cookie loads until then.
- * autoplay=1 starts it once the iframe is swapped in for the poster.
+ * The clip lives on YouTube (privacy-enhanced -nocookie host) and is embedded
+ * only after an explicit consent step. autoplay=1 starts it once the iframe is
+ * swapped in for the poster.
+ *
+ * Why two steps rather than loading on the first click: consent under Art. 4
+ * no. 11 GDPR has to be *informed*, and a bare play glyph is not. Someone
+ * pressing it is saying "I want to watch", not "I agree to my IP address going
+ * to Google in the US". So the first click only opens the notice — which names
+ * the recipient, the data and the transfer — and nothing is requested from
+ * YouTube until the button in that notice is pressed.
  */
 const embedSrc =
   'https://www.youtube-nocookie.com/embed/33XQZg2YYDY?autoplay=1&rel=0';
 
 const duration = '2:46';
+
+/*
+ * Same BASE_URL dance as SiteFooter: Astro rewrites neither, and BASE_URL may
+ * or may not carry a trailing slash depending on how `base` is written.
+ */
+const datenschutzHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/datenschutz/`;
 ---
 
 <section class="bb-section" id="video">
@@ -23,12 +36,18 @@ const duration = '2:46';
   </div>
 
   {/*
-    A click-to-play facade rather than an always-on iframe: nothing is loaded
-    from YouTube until someone presses play. The button carries the embed URL;
-    the script swaps in the <iframe> on the first press.
+    A facade rather than an always-on iframe: nothing is loaded from YouTube
+    until consent is given. The poster only opens the notice below it — the
+    embed URL sits on the confirm button, so the poster itself cannot trigger a
+    request even if the script were changed carelessly.
   */}
   <div class="stage" data-video-stage>
-    <button class="poster" type="button" data-embed-src={embedSrc} aria-label="Live-Video abspielen">
+    <button
+      class="poster"
+      type="button"
+      aria-haspopup="dialog"
+      aria-label="Live-Video abspielen — fragt zuerst nach Ihrer Einwilligung"
+    >
       <Image
         class="cover"
         src={coverImage}
@@ -53,20 +72,84 @@ const duration = '2:46';
 
       <span class="duration" aria-hidden="true">{duration}</span>
     </button>
+
+    {/*
+      The consent notice. Everything a visitor needs in order to decide is here,
+      visible *before* the button that actually loads anything: who receives the
+      data, what is sent, that it goes to the US, and that YouTube may then store
+      things on the device. The choice is not remembered — see /datenschutz/.
+    */}
+    <div
+      class="consent"
+      data-video-consent
+      hidden
+      role="dialog"
+      aria-labelledby="video-consent-title"
+      aria-describedby="video-consent-text"
+    >
+      <div class="consent-inner">
+        <h3 id="video-consent-title">Video von YouTube laden?</h3>
+        <p id="video-consent-text">
+          Dabei werden Ihre IP-Adresse und Angaben zu Ihrem Gerät an die Google
+          Ireland Limited übertragen; die Verarbeitung kann auch in den USA
+          erfolgen. YouTube kann anschließend Informationen auf Ihrem Gerät
+          speichern. Bis Sie zustimmen, wird nichts geladen.
+        </p>
+        <p class="consent-link">
+          <a href={datenschutzHref}>Mehr in der Datenschutzerklärung</a>
+        </p>
+        <div class="consent-actions">
+          <button class="btn solid" type="button" data-video-accept data-embed-src={embedSrc}>
+            Einverstanden, Video laden
+          </button>
+          <button class="btn outline" type="button" data-video-cancel>Abbrechen</button>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <script>
   /*
-   * On the first click, replace the poster button with the YouTube iframe.
-   * Nothing is loaded from YouTube before this point.
+   * Poster -> notice -> iframe. The only place that touches the YouTube URL is
+   * the accept handler, so no request can leave before consent.
    */
   for (const stage of document.querySelectorAll<HTMLElement>('[data-video-stage]')) {
     const poster = stage.querySelector<HTMLButtonElement>('.poster');
-    poster?.addEventListener(
+    const consent = stage.querySelector<HTMLElement>('[data-video-consent]');
+    const accept = stage.querySelector<HTMLButtonElement>('[data-video-accept]');
+    const cancel = stage.querySelector<HTMLButtonElement>('[data-video-cancel]');
+    if (!poster || !consent || !accept || !cancel) continue;
+
+    const closeNotice = () => {
+      consent.hidden = true;
+      stage.classList.remove('is-asking');
+      poster.disabled = false;
+      poster.focus();
+    };
+
+    poster.addEventListener('click', () => {
+      consent.hidden = false;
+      /*
+       * The poster stays visible as the backdrop, but disabling it takes it out
+       * of the tab order so keyboard focus cannot land behind the notice.
+       */
+      poster.disabled = true;
+      stage.classList.add('is-asking');
+      accept.focus();
+    });
+
+    cancel.addEventListener('click', closeNotice);
+
+    // Focus is inside the stage while the notice is open, so this reaches it.
+    stage.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !consent.hidden) closeNotice();
+    });
+
+    accept.addEventListener(
       'click',
       () => {
-        const src = poster.dataset.embedSrc;
+        const src = accept.dataset.embedSrc;
         if (!src) return;
 
         const iframe = document.createElement('iframe');
@@ -78,7 +161,11 @@ const duration = '2:46';
         iframe.referrerPolicy = 'strict-origin-when-cross-origin';
         iframe.allowFullscreen = true;
 
+        stage.classList.remove('is-asking');
+        consent.remove();
         poster.replaceWith(iframe);
+        // The button that had focus is gone; hand it to the player instead.
+        iframe.focus();
       },
       { once: true },
     );
@@ -93,6 +180,28 @@ const duration = '2:46';
     overflow: hidden;
     border: 1px solid var(--bb-border);
     background: var(--bb-panel);
+  }
+
+  /*
+   * While the notice is open the box has to be allowed to outgrow 16:9. At
+   * phone widths the ratio leaves under 200px of height — nowhere near enough
+   * for the heading, the text and both buttons, and a notice you have to
+   * scroll to finish reading is not an informed one.
+   *
+   * `min-block-size: fit-content` reads like the right tool but does not work:
+   * a box that also carries `aspect-ratio` does not grow from it (verified in
+   * the browser, with and without `overflow: hidden`). Hence an explicit floor.
+   * Measured need, worst case first: 446px at a 320px viewport (the confirm
+   * label wraps to two lines there), 430px from 375px up. 29rem is 464px, so
+   * even the tightest phone shows the whole notice without scrolling.
+   *
+   * It only bites below roughly 860px of viewport width — above that the 16:9
+   * height is the larger of the two and wins, so desktop is untouched. The
+   * poster is absolutely positioned and simply fills the taller box.
+   */
+  .stage.is-asking {
+    display: flex;
+    min-block-size: 29rem;
   }
 
   /*
@@ -203,6 +312,124 @@ const duration = '2:46';
   .poster:focus-visible {
     outline: 2px solid var(--bb-amber);
     outline-offset: -4px;
+  }
+
+  /* Disabled only while it acts as the backdrop, so drop the affordance. */
+  .poster:disabled {
+    cursor: default;
+  }
+
+  /*
+   * `align-self: stretch` makes the scrim cover the whole stage even when the
+   * 16:9 box is taller than the text, so the poster never half shows through.
+   */
+  .consent {
+    position: relative;
+    z-index: 2;
+    align-self: stretch;
+    inline-size: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(16px, 3vw, 34px);
+    background: rgba(9, 9, 8, 0.9);
+    /*
+     * Belt and braces behind the min-block-size above: if the text ever grows
+     * past the floor, the notice scrolls rather than clipping its buttons away.
+     */
+    overflow-y: auto;
+  }
+
+  /*
+   * Beats the `display: flex` above on specificity, which a bare [hidden] rule
+   * would not — without this the notice would be visible from the start.
+   */
+  .consent[hidden] {
+    display: none;
+  }
+
+  .consent-inner {
+    max-inline-size: 460px;
+    text-align: center;
+  }
+
+  /* Global h3 is the Anton display face; the notice wants the reading one. */
+  .consent h3 {
+    font-family: var(--bb-condensed);
+    font-size: clamp(20px, 3.5vw, 26px);
+    letter-spacing: 0.04em;
+    margin-block-end: 12px;
+  }
+
+  .consent p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--bb-text);
+  }
+
+  .consent-link {
+    margin-block-start: 10px;
+  }
+
+  .consent-link a {
+    font-size: 13px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .consent-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-block-start: 22px;
+  }
+
+  /*
+   * Mirrors the .btn rules in BookingCta.astro — Astro scopes <style> per
+   * component, so they cannot be shared, only kept visually in step. Colours
+   * are inverted here because this sits on a dark scrim rather than on amber.
+   *
+   * Both buttons are deliberately the same size and weight: supervisory
+   * authorities treat a consent dialog whose reject option is quieter than its
+   * accept option as invalid, and nothing is preselected.
+   */
+  .btn {
+    font-family: var(--bb-condensed);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 15px;
+    padding: 13px 22px;
+    border: 2px solid var(--bb-amber);
+    border-radius: var(--bb-radius-btn);
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      opacity 0.15s ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .solid {
+    background: var(--bb-amber);
+    color: var(--bb-panel);
+  }
+
+  .solid:hover {
+    background: var(--bb-amber-hover);
+    border-color: var(--bb-amber-hover);
+  }
+
+  .outline {
+    background: none;
+    color: var(--bb-amber);
+  }
+
+  .outline:hover {
+    opacity: 0.75;
   }
 
   .meta {
