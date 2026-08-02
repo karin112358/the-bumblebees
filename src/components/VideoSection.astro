@@ -189,19 +189,56 @@ const datenschutzHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/datensch
    * scroll to finish reading is not an informed one.
    *
    * `min-block-size: fit-content` reads like the right tool but does not work:
-   * a box that also carries `aspect-ratio` does not grow from it (verified in
-   * the browser, with and without `overflow: hidden`). Hence an explicit floor.
-   * Measured need, worst case first: 446px at a 320px viewport (the confirm
-   * label wraps to two lines there), 430px from 375px up. 29rem is 464px, so
-   * even the tightest phone shows the whole notice without scrolling.
+   * a box that also carries `aspect-ratio` does not grow from it (re-verified
+   * after the width fix below, so this is not a side effect of that). Hence an
+   * explicit floor, staggered because how far the text wraps depends heavily on
+   * width. Measured need per device width, without a scrollbar:
    *
-   * It only bites below roughly 860px of viewport width — above that the 16:9
-   * height is the larger of the two and wins, so desktop is untouched. The
+   *   320px -> 430    360px -> 389    390px -> 366    430px -> 343
+   *
+   * The floor only bites below roughly 860px of viewport width — above that the
+   * 16:9 height is the larger of the two and wins, so desktop is untouched. The
    * poster is absolutely positioned and simply fills the taller box.
    */
   .stage.is-asking {
     display: flex;
-    min-block-size: 29rem;
+    /*
+     * `inline-size: 100%` is load-bearing, not decoration. Without it the width
+     * stays `auto`, and `aspect-ratio` then runs backwards: it takes the
+     * min-block-size below and derives a *width* from it, so on a 390px phone
+     * the stage came out 448 x 796 and pushed the whole page into horizontal
+     * scrolling. Giving the width a definite value forces the ratio to work in
+     * the intended direction — width first, height from it, then raised by the
+     * minimum. Desktop is unaffected: 100% there is still the 16:9 height,
+     * which is larger than the minimum anyway.
+     */
+    inline-size: 100%;
+    min-block-size: 23rem;
+  }
+
+  @media (max-width: 400px) {
+    .stage.is-asking {
+      min-block-size: 26rem;
+    }
+  }
+
+  @media (max-width: 340px) {
+    .stage.is-asking {
+      min-block-size: 28rem;
+    }
+  }
+
+  /*
+   * The poster stays as the backdrop, but its furniture does not. On a phone the
+   * notice is taller than its text, and the play disc, the bee/wordmark corner
+   * and the running time showed through the scrim underneath the buttons as
+   * ghosted smudges — they read as leftovers rather than as part of the panel.
+   * The photo alone behind the scrim is what the notice should sit on.
+   */
+  .stage.is-asking .play,
+  .stage.is-asking .meta,
+  .stage.is-asking .duration {
+    opacity: 0;
   }
 
   /*
@@ -383,6 +420,21 @@ const datenschutzHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/datensch
     justify-content: center;
     flex-wrap: wrap;
     margin-block-start: 22px;
+  }
+
+  /*
+   * Below this the two buttons no longer fit on one line — the confirm label is
+   * twice the width of "Abbrechen", so wrapping leaves a wide button above a
+   * narrow one. Side by side that difference reads as neutral; stacked it reads
+   * as "reject is the lesser option", which is precisely the shape supervisory
+   * authorities reject in consent dialogs. Stretching both to the full width
+   * makes them identical again.
+   */
+  @media (max-width: 520px) {
+    .consent-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 
   /*

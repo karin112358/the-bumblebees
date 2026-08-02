@@ -129,5 +129,24 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         background: var(--bb-panel);
       }
     </style>
+
+    <!--
+      Simple Analytics. This is the only third-party request the site makes on a
+      normal page view, so it is worth being deliberate about:
+
+      - No cookies and nothing written to the device, so § 165 Abs 3 TKG 2021 is
+        not triggered and no consent banner is needed. That claim in
+        /datenschutz/ depends on this staying true — a tool that sets storage
+        would change the legal picture entirely.
+      - Do Not Track is honoured by default (`data-collect-dnt` defaults to
+        false, i.e. DNT visitors are not counted). Do not add that attribute.
+      - Deliberately no <noscript> pixel: it would add a second third-party
+        request for visitors without JavaScript in exchange for very little.
+
+      `is:inline` is explicit rather than implied: Astro would treat it that way
+      anyway because of the `async` attribute, and the tag has to reach the page
+      untouched rather than being bundled.
+    -->
+    <script is:inline async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
   </body>
 </html>
