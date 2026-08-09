@@ -10,11 +10,11 @@ const email = 'booking@thebumblebees.at';
 ---
 
 <section class="booking" id="buchen">
-  <div class="inner">
+  <div class="bb-container bb-split">
     <div class="pitch">
-      <p class="eyebrow">Band buchen</p>
+      <p class="bb-eyebrow eyebrow">Band buchen</p>
       <h2>Holt euch die Bumblebees auf eure Bühne.</h2>
-      <p class="body">
+      <p class="bb-prose body">
         Ihr plant ein Fest, eine Firmenveranstaltung, einen Musikabend oder ein
         anderes Event, bei dem handgemachte Rockmusik nicht fehlen darf?
       </p>
@@ -23,7 +23,7 @@ const email = 'booking@thebumblebees.at';
         lives in the card as a list — saying it in both places is what made the
         old block feel repetitive.
       */}
-      <p class="body">
+      <p class="bb-prose body">
         Wir bieten rund zwei Stunden Rock, Funk, Soul und Pop, auf Wunsch
         aufgeteilt auf mehrere Sets. Wir melden uns mit den wichtigsten
         Informationen zu Verfügbarkeit, Technik und Konditionen.
@@ -39,7 +39,7 @@ const email = 'booking@thebumblebees.at';
     <div class="card">
       <h3>Anfrage</h3>
 
-      <a class="btn" href={`mailto:${email}`}>{email}</a>
+      <a class="bb-btn bb-btn-solid" href={`mailto:${email}`}>{email}</a>
 
       <p class="hint">Damit wir schnell antworten können, schreibt uns dazu:</p>
       <ul class="checklist">
@@ -75,26 +75,17 @@ const email = 'booking@thebumblebees.at';
   }
 
   /*
-   * Same two-column shape as About.astro — one grid pattern for the page rather
-   * than a second one just for this block.
+   * There is no rule for the inner div on purpose: the band paints edge to edge
+   * and holds only its contents to the column, which is .bb-container, and the
+   * two-column shape it uses is .bb-split — the same one About has, rather than
+   * a second one written just for this block.
    */
-  .inner {
-    max-inline-size: var(--bb-max);
-    margin-inline: auto;
-    padding-inline: var(--bb-gutter);
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: clamp(32px, 5vw, 56px);
-    align-items: center;
-  }
 
-  /* Inverted against the amber panel, so not the shared .bb-eyebrow. */
+  /* The shared eyebrow, inverted: amber on dark everywhere else, dark on amber
+     here. Only the colour and the gap differ, so the rest still comes from
+     .bb-eyebrow. */
   .eyebrow {
-    font-family: var(--bb-mono);
-    font-size: 12px;
-    letter-spacing: 0.24em;
     color: var(--bb-panel);
-    text-transform: uppercase;
     margin-block-end: 16px;
   }
 
@@ -109,26 +100,19 @@ const email = 'booking@thebumblebees.at';
     line-height: 1.02;
     color: var(--bb-panel);
     max-inline-size: 640px;
+    /* The gap down to the first paragraph; .bb-prose owns the ones between. */
+    margin-block-end: 22px;
   }
 
   /*
-   * .body is styled in About.astro, but Astro scopes component styles, so none
-   * of that reaches here — these paragraphs were rendering with the inherited
-   * grey --bb-text on amber and no margins at all (the global reset zeroes them).
-   *
-   * Narrower than the h2's 640px: at 16px this is roughly 70 characters, while
-   * the full container width was running to about 130.
+   * Size, leading and the paragraph gap come from the global .bb-prose; only
+   * the colour and the measure are local, and both genuinely differ from
+   * About's — dark on amber here, and narrower than the h2's 640px because at
+   * 16px that is roughly 70 characters against the container's 130.
    */
   .body {
-    font-size: 16px;
-    line-height: 1.75;
     color: var(--bb-panel);
     max-inline-size: 560px;
-    margin-block-start: 22px;
-  }
-
-  .body + .body {
-    margin-block-start: 1.1em;
   }
 
   .card {
@@ -147,35 +131,19 @@ const email = 'booking@thebumblebees.at';
   }
 
   /*
-   * Inverted against the button on the amber panel: there it is a dark block on
-   * yellow, here a yellow block on dark. Same relationship as the confirm button
-   * in VideoSection's consent notice.
+   * .bb-btn-solid carries the amber block and the dark label — inverted against
+   * the panel it sits on, the same relationship as the confirm button in
+   * VideoSection's consent notice. Only the full-width shape and the tighter
+   * padding are local.
    */
-  .btn {
+  .bb-btn {
     display: block;
     text-align: center;
     margin-block-start: 22px;
-    font-family: var(--bb-condensed);
-    font-weight: 700;
-    text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-size: 16px;
     padding: 16px 20px;
-    border-radius: var(--bb-radius-btn);
-    background: var(--bb-amber);
-    color: var(--bb-panel);
     /* The address is long enough to overflow a phone otherwise. */
     overflow-wrap: anywhere;
-    transition:
-      transform 0.15s ease,
-      background 0.15s ease;
-  }
-
-  /* Needs its own colour: the global a:hover would repaint the label amber. */
-  .btn:hover {
-    background: var(--bb-amber-hover);
-    color: var(--bb-panel);
-    transform: translateY(-2px);
   }
 
   .hint {
@@ -187,8 +155,6 @@ const email = 'booking@thebumblebees.at';
 
   .checklist {
     margin-block-start: 14px;
-    padding: 0;
-    list-style: none;
     display: grid;
     gap: 10px;
   }
@@ -245,11 +211,5 @@ const email = 'booking@thebumblebees.at';
    */
   .card :focus-visible {
     outline-color: var(--bb-amber);
-  }
-
-  @media (max-width: 860px) {
-    .inner {
-      grid-template-columns: 1fr;
-    }
   }
 </style>

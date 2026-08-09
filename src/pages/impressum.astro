@@ -11,227 +11,44 @@ const email = 'booking@thebumblebees.at';
 
 <BaseLayout
   title="Impressum"
-  description="Impressum und Offenlegung der Band The Bumblebees gemäß § 25 Mediengesetz und § 5 E-Commerce-Gesetz."
+  description="Impressum und Offenlegung der Hobbyband The Bumblebees."
 >
   <SiteNav />
 
   <main class="legal bb-section">
     <p class="bb-eyebrow">Rechtliches</p>
     <h1>Impressum</h1>
-    <p class="lede">
-      Offenlegung gemäß § 25 Mediengesetz (MedienG) und Informationspflicht
-      gemäß § 5 E-Commerce-Gesetz (ECG).
-    </p>
 
     <section>
-      <h2>Medieninhaber und Herausgeber</h2>
+      <h2>Medieninhaber</h2>
       <p>
-        <span class="ph">[Vor- und Nachname der vertretungsbefugten Person]</span
-        ><br />
-        <span class="ph">[Straße und Hausnummer]</span><br />
-        <span class="ph">[PLZ]</span> <span class="ph">[Ort]</span><br />
+        Martin Stummer<br />
+        5401 Neuhofen an der Krems<br />
         Österreich
       </p>
-      <p class="note">
-        § 25 MedienG verlangt nur Wohnort bzw. Sitz, § 5 Abs 1 Z 2 ECG dagegen
-        die vollständige geografische Anschrift — deshalb steht hier die
-        Straßenadresse. Sie muss ladungsfähig sein; ein Postfach genügt nicht.
-        Eine gesonderte Angabe „für den Inhalt verantwortlich“ ist in
-        Österreich nicht vorgeschrieben — maßgeblich ist der Medieninhaber.
+      <p>
+        E-Mail: <a href={`mailto:${email}`}>{email}</a>
       </p>
     </section>
 
     <section>
-      <h2>Kontakt</h2>
+      <h2>Offenlegung gemäß § 25 MedienG</h2>
       <p>
-        E-Mail: <a href={`mailto:${email}`}>{email}</a><br />
-        Telefon: <span class="ph">[+43 000 0000000]</span>
-      </p>
-    </section>
-
-    <section>
-      <h2>Unternehmensgegenstand</h2>
-      <p>
-        Musikgruppe — Ausübung von Live-Musik bei Konzerten und Veranstaltungen
-        sowie der Betrieb dieser Website zur Information über die Band.
-      </p>
-    </section>
-
-    <section>
-      <h2>Grundlegende Richtung (Blattlinie)</h2>
-      <p>
-        Information über die Band The Bumblebees, ihre Mitglieder, ihre
-        Auftritte und ihre Musik. Die Website verfolgt keine
-        parteipolitischen oder weltanschaulichen Ziele.
-      </p>
-      <p class="note">
-        Freiwillig: § 25 Abs 5 MedienG nimmt „kleine Websites“ — reine
-        Selbstdarstellung ohne meinungsbildenden Inhalt — von Abs 3 und 4 und
-        damit von der Blattlinie aus. Verpflichtend wird sie erst, wenn die
-        Seite redaktionelle Inhalte wie Blog, Kommentare oder Rezensionen
-        bekommt; dann sind zusätzlich die Eigentums- und
-        Beteiligungsverhältnisse offenzulegen.
-      </p>
-    </section>
-
-    <section>
-      <h2>Unternehmensdaten</h2>
-      <p>
-        Rechtsform: <span class="ph">[z. B. nicht eingetragener Verein / Einzelunternehmen / GesbR]</span
-        ><br />
-        UID-Nummer: <span class="ph">[ATU00000000 — entfällt bei Kleinunternehmern]</span
-        ><br />
-        Firmenbuchnummer und -gericht: <span class="ph">[FN 000000a, Landesgericht …]</span
-        ><br />
-        Vereinsregisternummer: <span class="ph">[ZVR 0000000000]</span><br />
-        Vereinszweck: <span class="ph">[Vereinszweck laut Statuten]</span><br />
-        Vorstand: <span class="ph">[Namen der Vorstandsmitglieder]</span>
-      </p>
-      <p class="note">
-        Nur die Zeilen ausfüllen, die tatsächlich zutreffen, und den Rest
-        löschen — nicht eingetragene Bands haben weder Firmenbuch- noch
-        UID-Nummer. Ist die Band als Verein organisiert, sind Vorstand und
-        Vereinszweck nach § 25 Abs 2 MedienG verpflichtend.
-      </p>
-    </section>
-
-    <section>
-      <h2>Berufsrecht und Aufsicht</h2>
-      <p>
-        Die Tätigkeit als Musikgruppe ist Ausübung der schönen Künste und
-        damit von der Gewerbeordnung 1994 ausgenommen (§ 2 Abs 1 Z 7 und
-        Z 17 GewO 1994). Es besteht daher weder eine Gewerbeberechtigung noch
-        eine Kammermitgliedschaft, und es unterliegt kein reglementierter
-        Beruf einer Aufsichtsbehörde.
-      </p>
-      <p class="note">
-        Diesen Absatz nur ersetzen, falls die Band tatsächlich gewerblich
-        tätig ist — etwa als Veranstaltungsagentur oder mit rein
-        reproduzierender Tätigkeit, die nicht mehr unter die Kunstausnahme
-        fällt. Dann Gewerbewortlaut, Gewerbebehörde (Bezirkshauptmannschaft
-        bzw. Magistrat) und Kammerzugehörigkeit angeben. Ohne Gewerbe dürfen
-        diese Angaben nicht behauptet werden.
+        Diese Website dient der Präsentation der Hobbyband The Bumblebees, ihrer
+        Mitglieder, Musik und Auftritte.
       </p>
     </section>
 
     <section>
       <h2>Urheberrecht</h2>
       <p>
-        Alle Inhalte dieser Website — insbesondere Texte, Fotos, Video- und
-        Tonaufnahmen sowie das Logo — sind urheberrechtlich geschützt. Eine
-        Verwendung außerhalb der Grenzen des Urheberrechtsgesetzes bedarf der
-        vorherigen schriftlichen Zustimmung. Fotos:{' '}
-        <span class="ph">[Name des Fotografen bzw. der Fotografin]</span>.
+        Die Inhalte dieser Website, insbesondere Texte, Fotos, Grafiken, Videos
+        und Musik, sind urheberrechtlich geschützt. Eine Verwendung außerhalb
+        der gesetzlichen Grenzen bedarf der Zustimmung der jeweiligen
+        Rechteinhaber.
       </p>
     </section>
-
-    <section>
-      <h2>Haftung für Inhalte und Links</h2>
-      <p>
-        Die Inhalte dieser Website wurden mit größtmöglicher Sorgfalt erstellt.
-        Für Richtigkeit, Vollständigkeit und Aktualität wird keine Gewähr
-        übernommen. Diese Website enthält Links zu externen Websites Dritter,
-        auf deren Inhalte kein Einfluss besteht; für diese Inhalte ist stets
-        der jeweilige Anbieter verantwortlich.
-      </p>
-    </section>
-
-    <section>
-      <h2>Verbraucherstreitbeilegung</h2>
-      <p>
-        Wir sind weder verpflichtet noch bereit, an Streitbeilegungsverfahren
-        vor einer Verbraucherschlichtungsstelle im Sinne des § 19 AStG
-        teilzunehmen.
-      </p>
-      <p class="note">
-        Bewusst ohne Link auf die EU-Plattform zur Online-Streitbeilegung: Die
-        ODR-Verordnung (EU) Nr. 524/2013 wurde durch die Verordnung (EU)
-        2024/3228 aufgehoben, die Plattform am 20. Juli 2025 eingestellt. Der
-        früher übliche Link geht ins Leere und ist zu entfernen, nicht zu
-        ergänzen.
-      </p>
-    </section>
-
-    <p class="stand">
-      Stand: <span class="ph">[Monat Jahr]</span>
-    </p>
   </main>
 
   <SiteFooter />
 </BaseLayout>
-
-<style>
-  .legal {
-    /* Legal prose, so a reading measure rather than the full 1180px column. */
-    max-inline-size: 720px;
-    margin-inline: auto;
-    /*
-     * No hero here to sit under, so unlike the index the nav keeps its place in
-     * the flow and this only needs the section's own top padding.
-     */
-    padding-block-start: var(--bb-section-y);
-  }
-
-  h1 {
-    font-size: clamp(40px, 8vw, 68px);
-    margin-block: 14px 20px;
-  }
-
-  .lede {
-    font-size: 16px;
-    line-height: 1.75;
-    color: var(--bb-muted);
-  }
-
-  section {
-    margin-block-start: 44px;
-  }
-
-  h2 {
-    font-family: var(--bb-condensed);
-    font-size: 15px;
-    letter-spacing: 0.18em;
-    color: var(--bb-amber);
-    margin-block-end: 12px;
-  }
-
-  p {
-    font-size: 15px;
-    line-height: 1.8;
-  }
-
-  /*
-   * Every value still to be supplied is marked rather than merely blank, so an
-   * unfinished imprint is obvious on the page instead of only in the source.
-   */
-  .ph {
-    font-family: var(--bb-mono);
-    font-size: 13px;
-    color: var(--bb-amber);
-    background: rgba(243, 200, 20, 0.08);
-    border: 1px dashed rgba(243, 200, 20, 0.35);
-    border-radius: var(--bb-radius-btn);
-    padding: 1px 6px;
-    /* These strings are long; let them break rather than overflow a phone. */
-    overflow-wrap: anywhere;
-  }
-
-  /* Editing guidance for whoever fills this in — not part of the disclosure. */
-  .note {
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--bb-dim);
-    border-inline-start: 2px solid var(--bb-border-tag);
-    padding-inline-start: 14px;
-    margin-block-start: 12px;
-  }
-
-  .stand {
-    font-family: var(--bb-mono);
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--bb-dim);
-    margin-block-start: 56px;
-  }
-</style>

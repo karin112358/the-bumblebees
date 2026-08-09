@@ -19,7 +19,7 @@ import { members } from '../data/members';
               photo ? (
                 <Image src={photo} alt={`${name}, ${role}`} widths={[280, 560]} sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 280px" />
               ) : (
-                <span class="bb-placeholder">◹ Foto</span>
+                <span class="placeholder">◹ Foto</span>
               )
             }
           </div>
@@ -36,8 +36,6 @@ import { members } from '../data/members';
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 18px;
-    list-style: none;
-    padding: 0;
   }
 
   .frame {
@@ -54,12 +52,26 @@ import { members } from '../data/members';
     object-fit: cover;
   }
 
-  /* The placeholder needs to fill the square, and carries its own border. */
-  .frame .bb-placeholder {
+  /*
+   * The stand-in for a member without a photo. This is the only slot left that
+   * has none, so it lives here rather than in global.css — where it was a
+   * "utility" with exactly one caller, and one that overrode three of its
+   * properties at that. The frame supplies the border and the square.
+   */
+  .placeholder {
     width: 100%;
     height: 100%;
-    border: 0;
+    background: var(--bb-stripes);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--bb-mono);
     font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bb-dim);
+    text-align: center;
+    padding: 12px;
   }
 
   .role {

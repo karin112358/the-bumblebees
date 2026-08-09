@@ -36,24 +36,41 @@
  * resolution. That makes tokens the right way to share values across scopes.
  *
  * Values come from the "STAGE" design handoff.
+ *
+ * A note on specificity, because the split between this file and the scoped
+ * blocks depends on it: Astro appends [data-astro-cid-*] to every selector in
+ * a component's <style>, which adds a class's worth of specificity. So a
+ * component rule always outranks the same selector here, and the pattern
+ * throughout is "shared shape in this file, per-component deltas in the
+ * component" — no !important and no ordering games required.
+ *
+ * Order within this file does matter in one place: .legal narrows the width
+ * that .bb-section sets, at equal specificity, so it has to come after it.
+ *
+ * Sections: tokens · reset · elements · layout · utilities · components ·
+ * pages · motion.
  */
 
 :root {
   /* Brand */
   --bb-amber: #f3c814;
   --bb-amber-hover: #f7d54a;
+  /* Only the video poster's play disc, which lifts past the hover amber. */
+  --bb-amber-bright: #ffd21f;
 
   /* Surfaces, page shell outward */
   --bb-black: #1c1c1b;
   --bb-panel: #131312;
   --bb-card: #232320;
 
-  /* Text */
+  /* Text, lightest to darkest */
   --bb-white: #ffffff;
   --bb-text: #a9a9b0;
   --bb-muted: #8a8a92;
   --bb-faint: #77777e;
   --bb-dim: #5b5b62;
+  /* End of the ramp: footer text, and the hero's ghost-button border. */
+  --bb-dimmer: #55555c;
   --bb-nav: #cfcfd4;
 
   /* Lines */
@@ -89,6 +106,8 @@
   --bb-stripes: repeating-linear-gradient(45deg, #1a1a1d, #1a1a1d 12px, #151517 12px, #151517 24px);
 }
 
+/* ---------------------------------------------------------------- reset -- */
+
 *,
 *::before,
 *::after {
@@ -97,6 +116,26 @@
 
 * {
   margin: 0;
+}
+
+/*
+ * Every list in this design is a layout grid rather than prose, so the marker
+ * and the indent are noise. The [class] guard is what keeps that from reaching
+ * the one list that *is* prose — the rights list in the privacy notice, which
+ * is a bare <ul> and keeps its markers.
+ */
+ul[class],
+ol[class] {
+  list-style: none;
+  padding: 0;
+}
+
+/* ------------------------------------------------------------- elements -- */
+
+html {
+  scroll-behavior: smooth;
+  /* Keep anchor targets clear of the sticky nav that overlays them. */
+  scroll-padding-top: var(--bb-nav-h);
 }
 
 body {
@@ -146,16 +185,56 @@ h3 {
   color: var(--bb-white);
 }
 
+/* --------------------------------------------------------------- layout -- */
+
 /*
- * Utility, not a component: the small amber monospace label prefixing each
- * section ("Über uns"). Used in six places, always identically.
+ * The shell spans the viewport and owns only the panel colour. Width is capped
+ * per component (.bb-container and .bb-section below, plus .nav-inner, which
+ * takes the cap and keeps its own gutter), which lets the hero, marquee and
+ * booking bands run edge to edge without any 100vw breakout — and so without
+ * the horizontal overflow that 100vw causes once a scrollbar is present.
+ *
+ * No overflow clip here either: it would trap the sticky nav, since sticky
+ * resolves against the nearest clipping ancestor rather than the viewport. The
+ * three bands that bleed each clip themselves instead.
  */
-.bb-eyebrow {
-  font-family: var(--bb-mono);
-  font-size: 12px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--bb-amber);
+.shell {
+  position: relative;
+  background: var(--bb-panel);
+  /*
+   * Sticky footer. The index is always far taller than the viewport, so this
+   * only ever shows on a short page — the imprint, and the privacy notice on a
+   * tall window. Without it the panel stops where the content does and the
+   * darker page black shows through under the footer.
+   *
+   * The column is flex rather than block so the footer's auto top margin can
+   * absorb the leftover height. That changes how the children are sized: a flex
+   * item whose cross-axis margins are auto is not stretched, and every centred
+   * child here has margin-inline: auto. Hence the explicit inline-size: 100% on
+   * .bb-container/.bb-section below, which gives them a definite width again
+   * and keeps the sizing identical to what block layout produced.
+   */
+  min-block-size: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * The centred column. .bb-section is that column plus the vertical rhythm; the
+ * bare container is for the bands that paint edge to edge and hold only their
+ * contents to the column — the footer, and the booking block's inner grid.
+ */
+.bb-container,
+.bb-section {
+  /*
+   * Redundant in block layout, load-bearing as a child of the flex .shell —
+   * see the note there. With box-sizing: border-box this is what width: auto
+   * already resolved to, so nothing moves.
+   */
+  inline-size: 100%;
+  max-inline-size: var(--bb-max);
+  margin-inline: auto;
+  padding-inline: var(--bb-gutter);
 }
 
 /*
@@ -163,10 +242,25 @@ h3 {
  * flush under the one above and pads only its bottom. About re-adds the top.
  */
 .bb-section {
-  max-inline-size: var(--bb-max);
-  margin-inline: auto;
-  padding-inline: var(--bb-gutter);
   padding-block-end: var(--bb-section-y);
+}
+
+/*
+ * The page's one two-column shape: a wider text column beside a narrower
+ * figure. Used by About and by the booking block, which are meant to share a
+ * silhouette rather than each invent one.
+ */
+.bb-split {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(32px, 5vw, 56px);
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .bb-split {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Section heading + eyebrow, baseline-aligned across the full width. */
@@ -183,20 +277,199 @@ h3 {
   font-size: clamp(30px, 5vw, 40px);
 }
 
-.bb-placeholder {
-  background: var(--bb-stripes);
-  border: 1px solid var(--bb-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* ------------------------------------------------------------ utilities -- */
+
+/*
+ * The small amber monospace label prefixing each section ("Über uns"). Used in
+ * eight places, always identically.
+ */
+.bb-eyebrow {
+  font-family: var(--bb-mono);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--bb-amber);
+}
+
+/* Visible to assistive technology only. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*
+ * Running text — the About copy, the booking pitch, the setlist intro. Colour
+ * and measure stay with the component, because those genuinely differ per
+ * context: grey on the dark panel, near-black on the amber band.
+ *
+ * The paragraph gap lives here rather than in the components because the reset
+ * above zeroes every margin, so each of them would otherwise have to restore
+ * the same one.
+ */
+.bb-prose {
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.bb-prose + .bb-prose {
+  margin-block-start: 1.1em;
+}
+
+/* ----------------------------------------------------------- components -- */
+
+/*
+ * One button. It appears on the hero, in the booking card and in the video
+ * consent notice, and those three had drifted into three near-copies — the
+ * consent dialog in particular has a legal reason to stay visually level with
+ * the rest, which is safer stated as a shared rule than as a comment asking a
+ * future editor to remember.
+ *
+ * The base carries the hero's measurements, since that is the primary call to
+ * action; the other two override the two or three values they differ on.
+ * `border: 0` so the class also works on a bare <button> — the consent buttons
+ * put their outline back.
+ */
+.bb-btn {
+  font-family: var(--bb-condensed);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 16px;
+  padding: 14px 26px;
+  border: 0;
+  border-radius: var(--bb-radius-btn);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.bb-btn:hover {
+  transform: translateY(-2px);
+}
+
+/*
+ * Amber block, dark label. Beats the global `a` and `a:hover` rules on
+ * specificity, so the solid buttons that are links keep their dark label
+ * instead of being repainted amber.
+ */
+.bb-btn-solid {
+  background: var(--bb-amber);
+  color: var(--bb-panel);
+}
+
+.bb-btn-solid:hover {
+  background: var(--bb-amber-hover);
+  color: var(--bb-panel);
+}
+
+/* ---------------------------------------------------------------- pages -- */
+
+/*
+ * The imprint and the privacy notice. They are meant to be indistinguishable
+ * in layout, and used to hold two identical copies of these rules with a
+ * comment on each asking that they be kept in step — so they live here and
+ * both pages carry no CSS of their own.
+ *
+ * Must follow .bb-section: .legal narrows the same max-inline-size at equal
+ * specificity, so source order is what decides it.
+ */
+.legal {
+  /* Legal prose, so a reading measure rather than the full 1180px column. */
+  max-inline-size: 720px;
+  margin-inline: auto;
+  /*
+   * No hero on these pages to sit under, so unlike the index the nav keeps its
+   * place in the flow and this only needs the section's own top padding.
+   */
+  padding-block-start: var(--bb-section-y);
+}
+
+.legal h1 {
+  font-size: clamp(40px, 8vw, 68px);
+  margin-block: 14px 20px;
+}
+
+.legal .lede {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--bb-muted);
+}
+
+.legal section {
+  margin-block-start: 44px;
+}
+
+.legal h2 {
+  font-family: var(--bb-condensed);
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  color: var(--bb-amber);
+  margin-block-end: 12px;
+}
+
+.legal p {
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+/* The privacy notice stacks several paragraphs per section; the imprint has
+   at most one, so this is inert there. */
+.legal p + p {
+  margin-block-start: 14px;
+}
+
+/*
+ * The rights list in the privacy notice — the one list on the site that reads
+ * as prose and keeps its markers, which is why the reset above is guarded with
+ * [class]. The reset zeroes every margin, so both the block spacing and the
+ * indent have to be restored.
+ */
+.legal ul {
+  font-size: 15px;
+  line-height: 1.8;
+  margin-block: 14px;
+  padding-inline-start: 22px;
+}
+
+.legal li::marker {
+  color: var(--bb-faint);
+}
+
+/*
+ * Every value still to be supplied is marked rather than merely blank, so an
+ * unfinished imprint or notice is obvious on the page instead of only in the
+ * source.
+ */
+.legal .ph {
+  font-family: var(--bb-mono);
+  font-size: 13px;
+  color: var(--bb-amber);
+  background: color-mix(in srgb, var(--bb-amber) 8%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--bb-amber) 35%, transparent);
+  border-radius: var(--bb-radius-btn);
+  padding: 1px 6px;
+  /* These strings are long; let them break rather than overflow a phone. */
+  overflow-wrap: anywhere;
+}
+
+.legal .stand {
   font-family: var(--bb-mono);
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--bb-dim);
-  text-align: center;
-  padding: 12px;
+  margin-block-start: 56px;
 }
+
+/* --------------------------------------------------------------- motion -- */
 
 @media (prefers-reduced-motion: reduce) {
 

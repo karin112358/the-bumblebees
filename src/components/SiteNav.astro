@@ -30,7 +30,13 @@ const links = [
   { hash: '#video', label: 'Video' },
   { hash: '#konzerte', label: 'Konzerte' },
   { hash: '#buchen', label: 'Buchen' },
-].map(({ hash, label }) => ({ href: `${home}${hash}`, label }));
+/*
+ * `id` rides along beside the finished href: the scroll spy has to find each
+ * link's section, and the rendered href is base-prefixed, so a lookup by
+ * href alone would have to parse the URL back apart. Derived here so the list
+ * above stays the single place a section is named.
+ */
+].map(({ hash, label }) => ({ href: `${home}${hash}`, id: hash.slice(1), label }));
 
 /*
  * The design highlights one link as the current section, which only means
@@ -50,7 +56,7 @@ const onHome = strip(Astro.url.pathname) === strip(home);
 
 <header class:list={['nav', { 'is-home': onHome }]}>
   {/* The bar spans the viewport; only its contents are held to the column. */}
-  <div class="nav-inner">
+  <div class="nav-inner bb-container">
     <a class="brand" href={`${home}#top`}>
       {
         /* Intrinsic sizes match each viewBox ratio, so the row reserves the right
@@ -78,7 +84,13 @@ const onHome = strip(Astro.url.pathname) === strip(home);
     </button>
 
     <nav id="nav-links" class="links" aria-label="Hauptnavigation">
-      {links.map(({ href, label }) => <a href={href}>{label}</a>)}
+      {
+        links.map(({ href, id, label }) => (
+          <a href={href} data-section={id}>
+            {label}
+          </a>
+        ))
+      }
     </nav>
   </div>
 </header>
@@ -118,6 +130,110 @@ const onHome = strip(Astro.url.pathname) === strip(home);
       { threshold: 0 },
     ).observe(sentinel);
   }
+
+  /*
+   * Which link is the current one. Only on the start page — elsewhere the
+   * sections do not exist and nothing should be marked (see .is-home).
+   *
+   * Deliberately a scroll listener rather than another IntersectionObserver
+   * like the one above: the sentinel is a single binary state that flips
+   * rarely, while the active section is decided by five boundaries crossing
+   * one line. An observer would need a rootMargin collapsing the viewport to
+   * that line — a value that depends on the viewport height and has to be
+   * rebuilt on every resize, for no less work than the five rect reads below.
+   */
+  if (header?.classList.contains('is-home')) {
+    const targets: { link: HTMLAnchorElement; section: HTMLElement }[] = [];
+
+    header
+      .querySelectorAll<HTMLAnchorElement>('.links a[data-section]')
+      .forEach((link) => {
+        const section = document.getElementById(link.dataset.section!);
+        if (section) targets.push({ link, section });
+      });
+
+    if (targets.length) {
+      /*
+       * The same offset scroll-padding-top uses in BaseLayout, read from the
+       * token rather than repeated: the line the sections are measured against
+       * then sits exactly where an anchor jump parks them.
+       */
+      const root = getComputedStyle(document.documentElement);
+      const navH = parseFloat(root.getPropertyValue('--bb-nav-h')) || 80;
+
+      let current: HTMLAnchorElement | null = null;
+
+      const update = () => {
+        const max = document.documentElement.scrollHeight - innerHeight;
+
+        // The scroll position at which each section's top slides under the bar.
+        const points = targets.map(
+          ({ section }) => section.getBoundingClientRect().top + scrollY - navH,
+        );
+
+        /*
+         * Whatever sits in the last viewport-height of the document can never
+         * bring its top up to that line — the page runs out of scrolling first.
+         * On a tall window that is Konzerte and Buchen, which would then never
+         * be marked at all, not even by clicking them. So the points past the
+         * end get spread over the scrolling that is actually left, in order,
+         * and the final stretch still walks through them one by one.
+         */
+        const stuck = points.findIndex((point) => point > max);
+
+        if (stuck !== -1 && max > 0) {
+          const from = stuck === 0 ? 0 : points[stuck - 1];
+          const share = (max - from) / (points.length - stuck);
+
+          for (let i = stuck; i < points.length; i++) {
+            points[i] = from + share * (i - stuck + 1);
+          }
+        }
+
+        /*
+         * The last section that has been reached — none of them over the hero,
+         * where the reader is not in a section yet and nothing is marked.
+         * Sections without a link of their own (#setlist, #band) are not
+         * candidates, so they leave the preceding one marked rather than
+         * blanking the highlight halfway down the page.
+         */
+        let active: HTMLAnchorElement | null = null;
+
+        for (let i = 0; i < points.length; i++) {
+          if (scrollY >= points[i] - 1) active = targets[i].link;
+        }
+
+        if (active === current) return;
+
+        current?.removeAttribute('aria-current');
+        active?.setAttribute('aria-current', 'true');
+        current = active;
+      };
+
+      let queued = false;
+
+      const schedule = () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+          queued = false;
+          update();
+        });
+      };
+
+      addEventListener('scroll', schedule, { passive: true });
+      // Section tops move when the column reflows, not only when the page
+      // scrolls — a rotation or a late-loading gallery image shifts them all.
+      addEventListener('resize', schedule, { passive: true });
+
+      /*
+       * Run straight away rather than waiting for the first scroll: the page
+       * may already be mid-document from a #fragment or a restored scroll
+       * position, and the right link has to be lit before the reader looks.
+       */
+      update();
+    }
+  }
 </script>
 
 <style>
@@ -140,9 +256,12 @@ const onHome = strip(Astro.url.pathname) === strip(home);
       border-color 0.25s ease;
   }
 
+  /*
+   * .bb-container supplies the column cap and the centring; the padding is the
+   * one thing the bar does differently — a slightly tighter gutter than
+   * --bb-gutter, plus the 22px band that makes up --bb-nav-h.
+   */
   .nav-inner {
-    max-inline-size: var(--bb-max);
-    margin-inline: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -153,7 +272,7 @@ const onHome = strip(Astro.url.pathname) === strip(home);
   .nav.is-stuck,
   /* An open drawer needs the bar opaque even at the very top of the page. */
   .nav.is-open {
-    background: rgba(19, 19, 18, 0.92);
+    background: color-mix(in srgb, var(--bb-panel) 92%, transparent);
     border-block-end-color: var(--bb-border);
     backdrop-filter: blur(10px);
   }
@@ -209,9 +328,11 @@ const onHome = strip(Astro.url.pathname) === strip(home);
     color: var(--bb-nav);
   }
 
-  /* "Konzerte" is the active section in the design. Start page only — see the
-     frontmatter note on .is-home. */
-  .nav.is-home .links a:first-child {
+  /* The section currently under the bar, marked by the spy in the script
+     above. Start page only — see the frontmatter note on .is-home. No fallback
+     for a page without JavaScript: nothing is marked at the top of the
+     document either, so an unmarked bar is the honest resting state. */
+  .nav.is-home .links a[aria-current='true'] {
     color: var(--bb-amber);
   }
 
@@ -252,16 +373,6 @@ const onHome = strip(Astro.url.pathname) === strip(home);
 
   .bars::after {
     top: 5px;
-  }
-
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
   }
 
   @media (max-width: 760px) {

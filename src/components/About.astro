@@ -22,7 +22,7 @@ const lineup = [...new Set(members.map((m) => m.role))]
   .join(', ');
 ---
 
-<section class="about bb-section" id="ueber-uns">
+<section class="about bb-section bb-split" id="ueber-uns">
   <div>
     <p class="bb-eyebrow">Über uns</p>
     <h2>Laut, eingespielt<br />und gemacht<br />für die Bühne.</h2>
@@ -33,18 +33,18 @@ const lineup = [...new Set(members.map((m) => m.role))]
       Jahrzehnten"). A booker scanning this wants to picture the evening.
     */
     }
-    <p class="body">
+    <p class="bb-prose body">
       Von „December, 1963“ über „Smooth Operator“ und „Virtual Insanity“ bis zu
       „Under Pressure“, „Hold the Line“ und „Sweet Child o’ Mine“: Unsere
       Setlist bewegt sich zwischen Rock, Funk, Soul und Pop.
     </p>
-    <p class="body">
+    <p class="bb-prose body">
       Wir spielen bekannte Songs, aber nicht nur die üblichen
       Coverband-Klassiker. Entscheidend ist für uns, dass die Musik Groove hat,
       auf der Bühne Spaß macht und zu unserem Sound mit Gitarren, Piano und
       Saxophon passt.
     </p>
-    <p class="body">
+    <p class="bb-prose body">
       Ob Stadtfest, Vereinsveranstaltung, Firmenfeier oder Musikabend: Wir
       freuen uns über Bühnen, auf denen ehrliche, handgemachte Livemusik gefragt
       ist.
@@ -64,12 +64,12 @@ const lineup = [...new Set(members.map((m) => m.role))]
 </section>
 
 <style>
+  /*
+   * The only section with padding on both sides — the shape and the collapse
+   * to one column come from .bb-split, shared with the booking block.
+   */
   .about {
     padding-block: var(--bb-section-y);
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: clamp(32px, 5vw, 56px);
-    align-items: center;
   }
 
   h2 {
@@ -78,16 +78,10 @@ const lineup = [...new Set(members.map((m) => m.role))]
     margin-block: 18px 22px;
   }
 
+  /* Size, leading and the paragraph gap come from .bb-prose. */
   .body {
-    font-size: 16px;
-    line-height: 1.75;
     color: var(--bb-text);
     max-inline-size: 460px;
-  }
-
-  /* The global reset zeroes every margin, so paragraph spacing is set here. */
-  .body + .body {
-    margin-block-start: 1.1em;
   }
 
   .lineup {
@@ -112,11 +106,8 @@ const lineup = [...new Set(members.map((m) => m.role))]
     object-fit: cover;
   }
 
+  /* Matches the breakpoint .bb-split collapses at. */
   @media (max-width: 860px) {
-    .about {
-      grid-template-columns: 1fr;
-    }
-
     .portrait {
       height: 320px;
     }

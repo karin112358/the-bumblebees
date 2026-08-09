@@ -101,34 +101,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <!--
       The design is a fixed 1180px column of #131312 floating on the darker page
       black, so the shell — not each section — owns the width and the panel colour.
+      Styled in global.css alongside the html rule that used to sit here: both
+      are genuinely global, and that file says it is the only place such rules
+      belong.
     -->
     <div class="shell">
       <slot />
     </div>
-
-    <style is:global>
-      html {
-        scroll-behavior: smooth;
-        /* Keep anchor targets clear of the sticky nav that overlays them. */
-        scroll-padding-top: var(--bb-nav-h);
-      }
-
-      /*
-       * The shell spans the viewport and owns only the panel colour. Width is
-       * capped per component (.nav-inner, .bb-section, .booking .inner, the
-       * footer's .inner), which lets the hero, marquee and booking bands run
-       * edge to edge without any 100vw breakout — and so without the horizontal
-       * overflow that 100vw causes once a scrollbar is present.
-       *
-       * No overflow clip here either: it would trap the sticky nav, since
-       * sticky resolves against the nearest clipping ancestor rather than the
-       * viewport. The three bands that bleed each clip themselves instead.
-       */
-      .shell {
-        position: relative;
-        background: var(--bb-panel);
-      }
-    </style>
 
     <!--
       Simple Analytics. This is the only third-party request the site makes on a

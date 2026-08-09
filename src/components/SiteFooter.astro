@@ -23,7 +23,7 @@ const datenschutzHref = `${base}/datenschutz/`;
   same for the imprint.
 */}
 <footer class="footer">
-  <div class="inner">
+  <div class="inner bb-container">
     <span>© {year} The Bumblebees</span>
     <a href={impressumHref}>Impressum</a>
     <a href={datenschutzHref}>Datenschutz</a>
@@ -66,12 +66,16 @@ const datenschutzHref = `${base}/datenschutz/`;
   .footer {
     background: var(--bb-panel);
     padding-block: 26px;
+    /*
+     * Pushes the footer to the bottom of a short page — .shell is a flex column
+     * that fills the viewport, so this margin absorbs whatever height is left.
+     * Inert on the index, which always overflows the viewport anyway.
+     */
+    margin-block-start: auto;
   }
 
+  /* The bar paints edge to edge; .bb-container holds the row to the column. */
   .inner {
-    max-inline-size: var(--bb-max);
-    margin-inline: auto;
-    padding-inline: var(--bb-gutter);
     display: flex;
     justify-content: space-between;
     gap: 16px;
@@ -79,7 +83,7 @@ const datenschutzHref = `${base}/datenschutz/`;
     font-family: var(--bb-mono);
     font-size: 11px;
     letter-spacing: 0.16em;
-    color: #55555c;
+    color: var(--bb-dimmer);
     text-transform: uppercase;
   }
 
