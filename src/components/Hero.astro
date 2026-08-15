@@ -2,19 +2,50 @@
 import { Image } from 'astro:assets';
 
 import Wordmark from '../assets/logo/wordmark.svg';
-import heroPhoto from '../assets/images/band-1.jpeg';
+import band1Jpeg from '../assets/images/band-1.jpeg';
+import band1Jpg from '../assets/images/band-1.jpg';
+import band2 from '../assets/images/band-2.jpg';
+
+/*
+ * Slide 1 stays band-1.jpeg — the LCP image whose framing (object-position)
+ * and scrim were tuned; the others rotate in behind it. objectPosition is
+ * per-slide because each photo crops differently under object-fit: cover.
+ * Panoramic shots (e.g. band-5.jpeg, 2016x1134) crop badly on portrait
+ * phones — stick to 4:3 sources here.
+ */
+const slides = [
+  { src: band1Jpeg, objectPosition: 'center 0%' },
+  { src: band1Jpg },
+  { src: band2 },
+];
 ---
 
 <section class="hero" id="top">
-  <Image
-    class="photo"
-    src={heroPhoto}
-    alt="Die Bumblebees live auf der Bühne"
-    widths={[640, 960, 1280, 1693]}
-    sizes="100vw"
-    loading="eager"
-    fetchpriority="high"
-  />
+  <!--
+    The slides are stacked and cross-faded in pure CSS (see keyframes below).
+    Slide 1 must stay the LCP element: eager + high priority, real alt text.
+    The later slides are decorative repeats of the same subject, so they get
+    alt="" and load eagerly at low priority — lazy loading is avoided because
+    whether browsers fetch a covered, opacity-0 in-viewport image is
+    heuristic-dependent; eager+low guarantees they are decoded well before
+    the first fade without competing with the LCP fetch.
+  -->
+  <div class="photos">
+    {
+      slides.map(({ src, objectPosition }, i) => (
+        <Image
+          class="photo"
+          src={src}
+          alt={i === 0 ? 'Die Bumblebees live auf der Bühne' : ''}
+          widths={[640, 960, 1280, 1693]}
+          sizes="100vw"
+          loading="eager"
+          fetchpriority={i === 0 ? 'high' : 'low'}
+          style={objectPosition ? `--pos: ${objectPosition}` : undefined}
+        />
+      ))
+    }
+  </div>
   <div class="glow" aria-hidden="true"></div>
   <div class="scrim" aria-hidden="true"></div>
 
@@ -52,14 +83,100 @@ import heroPhoto from '../assets/images/band-1.jpeg';
     overflow: hidden;
   }
 
+  /*
+   * The slides carry z-indexes so the outgoing image always sits above the
+   * incoming one. isolation: isolate contains those z-indexes inside this
+   * wrapper, so the wrapper as a whole still paints below .glow/.scrim/
+   * .content/.rotated exactly like a single photo would.
+   */
+  .photos {
+    position: absolute;
+    inset: 0;
+    isolation: isolate;
+  }
+
   .photo {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Framed slightly above centre so the band sits under the wordmark. */
-    object-position: center 0%;
+    /* Per-slide framing; the default sits slightly above centre so the band
+       lands under the wordmark (tuned for band-1.jpeg). */
+    object-position: var(--pos, center 0%);
+  }
+
+  /*
+   * Cross-fade rotator, pure CSS. One shared 24s clock with no delays, so
+   * the slides can never drift apart. The trick: during every transition
+   * exactly one slide animates while a fully opaque slide sits directly
+   * beneath it — so there is never a dark dip or a double exposure,
+   * including on the very first cycle and at the wrap-around.
+   *
+   * Timeline (18s = 3 slides x 6s, 1.5s fades; 6s = 33.333%, 1.5s = 8.333%):
+   *   slide 1 (top):    visible 0-6s, fades OUT 6-7.5s, fades back IN 16.5-18s
+   *   slide 2:          opaque under cover, fades OUT 12-13.5s
+   *   slide 3 (bottom): permanently opaque base layer, no animation
+   * Slide 2 snaps back to opacity 1 at the loop point, invisibly, because
+   * slide 1 is fully opaque above it at that instant. Slide 1's 0%
+   * keyframe matches its natural opacity of 1, so the page loads with the
+   * hero already painted — no fade-in flash, no LCP change.
+   *
+   * Adding or removing a slide means recomputing these percentages by hand
+   * (keyframe selectors cannot use custom properties).
+   */
+  .photo:nth-child(1) {
+    z-index: 3;
+    animation: hero-slide-1 18s ease-in-out infinite;
+  }
+
+  .photo:nth-child(2) {
+    z-index: 2;
+    animation: hero-slide-2 18s ease-in-out infinite;
+  }
+
+  .photo:nth-child(3) {
+    z-index: 1;
+  }
+
+  @keyframes hero-slide-1 {
+    0%,
+    33.333% {
+      opacity: 1;
+    }
+
+    41.667%,
+    91.667% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes hero-slide-2 {
+    0%,
+    66.667% {
+      opacity: 1;
+    }
+
+    75%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /*
+   * The global reduced-motion rule collapses animation duration, which would
+   * complete all fades instantly and hard-cut between slides. Kill the
+   * animations outright instead: every slide reverts to its natural opacity
+   * of 1, and slide 1 — the top of the stack — shows as a static hero image.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .photo {
+      animation: none;
+    }
   }
 
   .glow {
