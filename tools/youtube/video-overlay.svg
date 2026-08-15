@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1920"
+  height="1080" viewBox="0 0 1920 1080">
+  <defs>
+
+    <linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#080807" stop-opacity="0"></stop>
+      <stop offset="55%" stop-color="#080807" stop-opacity="0.62"></stop>
+      <stop offset="100%" stop-color="#080807" stop-opacity="0.88"></stop>
+    </linearGradient>
+  </defs>
+
+
+  <rect x="0" y="560" width="1920" height="520" fill="url(#scrim)"></rect>
+
+  <!-- The hrefs are readable hints only: split-video.mjs replaces both with data
+       URIs built from src/assets/logo/ on every run, keyed on these ids. -->
+  <image id="bee" xlink:href="bee.svg" href="bee.svg" x="120" y="605" width="91" height="88"></image>
+  <image id="wordmark" xlink:href="wordmark.svg" href="wordmark.svg" x="235" y="644" width="117"
+    height="30"></image>
+
+  <!-- Width and y are placeholders: split-video.mjs stretches the rule to each
+       song's rendered title and drops it to sit just above the fitted caps. -->
+  <rect id="rule" x="120" y="719" width="760" height="3" fill="#f3c814"></rect>
+
+  <text id="song-title" x="120" y="850" font-family="Anton, Impact, sans-serif" font-size="142"
+    letter-spacing="0.7" fill="#f5f2e9">%title%</text>
+
+  <text id="original-artist" x="120" y="915"
+    font-family="&#39;Barlow Condensed&#39;, &#39;Arial Narrow&#39;, sans-serif" font-size="44"
+    letter-spacing="2.6" fill="#f3c814">%artist% COVER</text>
+
+  <text id="venue" x="120" y="972"
+    font-family="&#39;Barlow Condensed&#39;, &#39;Arial Narrow&#39;, sans-serif" font-size="34"
+    letter-spacing="3.4" fill="#f5f2e9" fill-opacity="0.88">%location%</text>
+  <circle id="dot" cx="655" cy="962" r="3.5" fill="#f3c814"></circle>
+  <text id="date" x="679" y="972"
+    font-family="&#39;Barlow Condensed&#39;, &#39;Arial Narrow&#39;, sans-serif" font-size="34"
+    letter-spacing="3.4" fill="#f5f2e9" fill-opacity="0.88">%date%</text>
+</svg>

@@ -12,10 +12,14 @@ tools/youtube/**/out/
 
 # Source recordings for the video build. Kept out of the repo deliberately:
 # they run to tens of megabytes per gig, and they are recordings of songs we
-# do not hold the rights to — this repository is public. songs.csv and the
-# build script stay tracked, so a gig folder only needs its audio dropped back
+# do not hold the rights to — this repository is public. The CSVs and the
+# build scripts stay tracked, so a gig folder only needs its audio dropped back
 # in to rebuild.
 tools/youtube/**/*.mp3
+
+# The whole-concert recording that split-video.mjs cuts up — same rights
+# reasoning as the MP3s above, and it runs to gigabytes per gig.
+tools/youtube/**/full-video.mp4
 
 # logs
 npm-debug.log*
