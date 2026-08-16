@@ -37,16 +37,25 @@ const { upcoming } = await getShows();
                   {show.data.city}
                   {show.data.country && `, ${show.data.country}`}
                 </p>
-                {time && <p class="time">Beginn {time} Uhr</p>}
-                {show.data.infoUrl && (
-                  <a
-                    class="info"
-                    href={show.data.infoUrl}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    Mehr Infos
-                  </a>
+                {(time || show.data.infoUrl) && (
+                  <p class="meta">
+                    {time && <span class="time">Beginn {time} Uhr</span>}
+                    {time && show.data.infoUrl && (
+                      <span class="sep" aria-hidden="true">
+                        •
+                      </span>
+                    )}
+                    {show.data.infoUrl && (
+                      <a
+                        class="info"
+                        href={show.data.infoUrl}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Mehr Infos<span class="arrow" aria-hidden="true">→</span>
+                      </a>
+                    )}
+                  </p>
                 )}
               </div>
 
@@ -118,25 +127,52 @@ const { upcoming } = await getShows();
     color: var(--bb-muted);
   }
 
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-block-start: 4px;
+  }
+
   .time {
     font-family: var(--bb-condensed);
     font-weight: 600;
     font-size: 14px;
     letter-spacing: 0.04em;
     color: var(--bb-amber);
-    margin-block-start: 4px;
+  }
+
+  .sep {
+    color: var(--bb-dim);
+    font-size: 9px;
   }
 
   .info {
-    display: inline-block;
     font-family: var(--bb-condensed);
     font-weight: 600;
     font-size: 14px;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
+    color: var(--bb-nav);
     text-decoration: underline;
-    text-underline-offset: 3px;
-    margin-block-start: 6px;
+    text-underline-offset: 4px;
+    transition: color 0.15s ease;
+  }
+
+  .info:hover {
+    color: var(--bb-amber);
+  }
+
+  /* inline-block keeps the parent's underline from being drawn through it. */
+  .info .arrow {
+    display: inline-block;
+    margin-inline-start: 8px;
+    transition: translate 0.15s ease;
+  }
+
+  .info:hover .arrow {
+    translate: 3px 0;
   }
 
   .tag {
