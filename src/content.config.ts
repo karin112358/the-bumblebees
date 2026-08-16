@@ -16,6 +16,8 @@ const shows = defineCollection({
       city: z.string(),
       country: z.string().optional(),
       ticketUrl: z.url().optional(),
+      // Rendered as a "Mehr Infos" link in the row, e.g. to a venue's flyer.
+      infoUrl: z.url().optional(),
       soldOut: z.boolean().default(false),
       // Rendered as the tag at the right of each show row, e.g. "Eintritt frei".
       note: z.string().optional(),

@@ -3,7 +3,7 @@
 # Neuen Termin anlegen: Eintrag unten anhängen. Schema in src/content.config.ts.
 #
 # Pflicht:  id (eindeutig), date (JJJJ-MM-TT, optional mit Uhrzeit "JJJJ-MM-TT HH:MM"), venue, city
-# Optional: country, ticketUrl, soldOut (Standard false), note
+# Optional: country, ticketUrl, infoUrl, soldOut (Standard false), note
 #
 # `note` wird im Design als Tag rechts in der Zeile gerendert, z. B. "Eintritt frei".
 # Alles was wie eine Zahl oder Uhrzeit aussieht bitte quoten, z. B. note: "3:42".
@@ -15,6 +15,7 @@
   venue: Soundplatz Rohr
   city: Ortsplatz, 4532 Rohr
   country: Oberösterreich
+  infoUrl: "https://www.rohr.ooe.gv.at/system/web/GetDocument.ashx?cts=1784708644&fileId=4343912&name=Datei%20herunterladen%20(1,12%20MB)%20-%20.PDF"
   soldOut: false
   note: Eintritt frei
 
