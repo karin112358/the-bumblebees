@@ -25,6 +25,6 @@ export const members: Member[] = [
   { name: 'Melanie Schallauer', role: 'Saxophon', photo: melanie },
   { name: 'Birgit Hrazdera', role: 'Saxophon', photo: birgit },
   { name: 'Harald Pixner', role: 'Bass', photo: harald },
-  { name: 'Martin Stummer', role: 'Schlagzeug', photo: martin },
+  { name: 'Martin Stummer-Brandstätter', role: 'Schlagzeug', photo: martin },
   { name: 'Karin Huber', role: 'Piano', photo: karin },
 ];
