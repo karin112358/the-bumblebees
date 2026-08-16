@@ -18,8 +18,10 @@ tools/youtube/**/out/
 tools/youtube/**/*.mp3
 
 # The whole-concert recording that split-video.mjs cuts up — same rights
-# reasoning as the MP3s above, and it runs to gigabytes per gig.
+# reasoning as the MP3s above, and it runs to gigabytes per gig. Newer gigs
+# keep the camera's raw AVCHD segments instead of a stitched MP4.
 tools/youtube/**/full-video.mp4
+tools/youtube/**/*.MTS
 
 # logs
 npm-debug.log*

@@ -13,15 +13,19 @@ export const probeDuration = (file) => {
   return Number.isFinite(seconds) && seconds > 0 ? seconds : null;
 };
 
-/* Frame size of the first video stream plus container duration, or null when the
- * file cannot be probed — callers decide whether that is fatal. */
+/* Frame size and pixel shape of the first video stream plus container duration,
+ * or null when the file cannot be probed — callers decide whether that is fatal.
+ * `sar` is the sample (pixel) aspect ratio as a plain number: AVCHD cameras
+ * store 1440×1080 with 4:3-wide pixels that players stretch to a 1920×1080
+ * picture, so storage width times sar is the width the viewer actually sees.
+ * An unset or nonsensical ratio means square pixels. */
 export const probeVideo = (file) => {
   const probe = spawnSync(
     'ffprobe',
     [
       '-v', 'error',
       '-select_streams', 'v:0',
-      '-show_entries', 'stream=width,height',
+      '-show_entries', 'stream=width,height,sample_aspect_ratio',
       '-show_entries', 'format=duration',
       '-of', 'json',
       file,
@@ -30,10 +34,12 @@ export const probeVideo = (file) => {
   );
   try {
     const parsed = JSON.parse(probe.stdout ?? '');
-    const { width, height } = parsed.streams?.[0] ?? {};
+    const { width, height, sample_aspect_ratio: ratio } = parsed.streams?.[0] ?? {};
     const duration = Number.parseFloat(parsed.format?.duration ?? '');
     if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) return null;
-    return { width, height, duration: Number.isFinite(duration) && duration > 0 ? duration : null };
+    const [num, den] = (ratio ?? '').split(':').map(Number);
+    const sar = num > 0 && den > 0 ? num / den : 1;
+    return { width, height, sar, duration: Number.isFinite(duration) && duration > 0 ? duration : null };
   } catch {
     return null;
   }

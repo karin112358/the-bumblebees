@@ -11,15 +11,18 @@
  *
  *   from;until;title;artist;location;date
  *
- * `from` and `until` are timestamps into the gig's full-video.mp4, written as
- * seconds, M:SS, MM:SS or H:MM:SS, each with an optional .ms fraction. Rows
- * whose timestamps are still empty are reported and skipped rather than treated
- * as errors, so the file can be filled in song by song while scrubbing through
- * the recording. Every other %column% token in video-overlay.svg is replaced
- * with the row's value, exactly as create-video-from-mp3.mjs does for covers.
+ * The recording is the gig folder's numbered AVCHD segments (00000.MTS, …):
+ * the camera splits one continuous take at its 2 GB file limit, so sorted by
+ * name and laid end to end they form a single timeline. `from` and `until` are
+ * timestamps into that combined timeline, written as seconds, M:SS, MM:SS or
+ * H:MM:SS, each with an optional .ms fraction. Rows whose timestamps are still
+ * empty are reported and skipped rather than treated as errors, so the file can
+ * be filled in song by song while scrubbing through the recording. Every other
+ * %column% token in video-overlay.svg is replaced with the row's value, exactly
+ * as create-video-from-mp3.mjs does for covers.
  *
  * Each row becomes <gig>/out/split-video/"<Title> - The Bumblebees.mp4": the
- * row's range cut from full-video.mp4, with the rendered overlay faded in over
+ * row's range cut from the recording, with the rendered overlay faded in over
  * the opening, held, and faded out (FADE_IN/HOLD/FADE_OUT below). Each tool
  * owns a subfolder of out/, keeping these clear of the identically-named
  * still-image MP4s from create-video-from-mp3.mjs.
@@ -33,7 +36,7 @@
  * the template's full 1920 px width instead of the source's visible frame
  * width, which is close enough for proofing the design.
  */
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { Resvg } from '@resvg/resvg-js';
@@ -61,7 +64,6 @@ import {
 const RULE_GAP = 24;
 
 const CSV_NAME = 'split-video.csv';
-const SOURCE_NAME = 'full-video.mp4';
 const TEMPLATE = join(YOUTUBE_DIR, 'video-overlay.svg');
 const LOGOS = [
   ['bee', at('src/assets/logo/bee.svg')],
@@ -112,10 +114,12 @@ if (!existsSync(csvPath)) {
   process.exit(1);
 }
 
-const source = join(gigDir, SOURCE_NAME);
+const segmentNames = readdirSync(gigDir)
+  .filter((name) => /\.mts$/i.test(name))
+  .sort();
 
-if (!imagesOnly && !existsSync(source)) {
-  console.error(`No ${SOURCE_NAME} in ${gigDir} — nothing to split.`);
+if (!imagesOnly && segmentNames.length === 0) {
+  console.error(`No .MTS files in ${gigDir} — nothing to split.`);
   process.exit(1);
 }
 
@@ -125,21 +129,47 @@ mkdirSync(outDir, { recursive: true });
 /* --------------------------------------------------------------------- source */
 
 /*
- * The recording decides the geometry. This gig's camera shoots 1440×1080 (4:3),
- * so the 1920-wide overlay pinned at the top-left corner loses its right side at
- * the frame edge — by design, everything it draws is left-aligned — and text may
- * only run to the *visible* width. That width is the source's, scaled to the
- * overlay's 1080-line canvas, so a future 16:9 gig gets the full 1920 without a
- * code change.
+ * Each segment's start offset on the combined timeline is the sum of the
+ * durations before it, so every segment must probe cleanly — a bad duration
+ * would silently shift every later song's cut. --images-only tolerates missing
+ * or unreadable segments because it never touches the timeline.
  */
-const video = existsSync(source) ? probeVideo(source) : null;
+let clock = 0;
+const segments = [];
+for (const name of segmentNames) {
+  const path = join(gigDir, name);
+  const info = probeVideo(path);
+  if (info === null || info.duration === null) {
+    if (imagesOnly) continue;
+    console.error(`ffprobe could not read ${path}`);
+    process.exit(1);
+  }
+  segments.push({ path, start: clock, ...info });
+  clock += info.duration;
+}
+const totalDuration = segments.length > 0 ? clock : null;
 
-if (!imagesOnly && !video) {
-  console.error(`ffprobe could not read ${source}`);
+/*
+ * The recording decides the geometry, and what matters is the picture the
+ * viewer sees, not the stored frame: this camera records 1440×1080 with 4:3
+ * pixels that players stretch to 1920×1080. Text may only run to that *display*
+ * width, scaled to the overlay's 1080-line canvas — a narrower source would
+ * lose the overlay's right side at the frame edge (by design, everything it
+ * draws is left-aligned), a 16:9 one like this gets the full 1920.
+ */
+const video = segments[0] ?? null;
+
+/* Mixed geometry would mean the segments are not one continuous take — the
+ * concat below would produce garbage, so refuse rather than guess. */
+const odd = segments.find(
+  (s) => s.width !== video?.width || s.height !== video?.height || s.sar !== video?.sar,
+);
+if (!imagesOnly && odd) {
+  console.error(`${odd.path} is ${odd.width}×${odd.height}, but the recording starts at ${video.width}×${video.height}.`);
   process.exit(1);
 }
 
-const visibleWidth = video ? Math.round((video.width * 1080) / video.height) : WIDTH;
+const visibleWidth = video ? Math.round((video.width * video.sar * 1080) / video.height) : WIDTH;
 const maxTextWidth = visibleWidth - MARGIN * 2;
 
 /* ---------------------------------------------------------------------- fonts */
@@ -230,6 +260,7 @@ if (songs.length === 0) {
 const templateMtime = statSync(TEMPLATE).mtimeMs;
 const csvMtime = statSync(csvPath).mtimeMs;
 const logoMtimes = LOGOS.map(([, path]) => statSync(path).mtimeMs);
+const segmentMtimes = segments.map(({ path }) => statSync(path).mtimeMs);
 
 const summary = [];
 const seenNames = new Set();
@@ -263,11 +294,11 @@ for (const song of songs) {
     process.exitCode = 1;
     continue;
   }
-  if (video?.duration && until > video.duration + 0.5) {
-    console.error(
-      `  ! ${song.title}: until (${song.until}) is past the end of ${SOURCE_NAME} ` +
-        `(${Math.floor(video.duration / 60)}:${String(Math.floor(video.duration % 60)).padStart(2, '0')})`,
-    );
+  if (totalDuration !== null && until > totalDuration + 0.5) {
+    const h = Math.floor(totalDuration / 3600);
+    const m = String(Math.floor((totalDuration % 3600) / 60)).padStart(2, '0');
+    const s = String(Math.floor(totalDuration % 60)).padStart(2, '0');
+    console.error(`  ! ${song.title}: until (${song.until}) is past the end of the recording (${h}:${m}:${s})`);
     process.exitCode = 1;
     continue;
   }
@@ -299,7 +330,7 @@ for (const song of songs) {
    * logos count as inputs because they are injected into every overlay. */
   const target = imagesOnly ? png : mp4;
   const inputs = [templateMtime, csvMtime, ...logoMtimes];
-  if (!imagesOnly) inputs.push(statSync(source).mtimeMs);
+  if (!imagesOnly) inputs.push(...segmentMtimes);
 
   if (!force && existsSync(target)) {
     const built = statSync(target).mtimeMs;
@@ -350,15 +381,21 @@ for (const song of songs) {
   }
 
   /*
-   * One pass per song. -ss before -i seeks fast (keyframe, then decode-and-
-   * discard) and is frame-accurate because everything is re-encoded anyway; it
-   * also resets timestamps to zero, so the fade times below are song-relative.
+   * One pass per song. The song's range may straddle a segment boundary, so the
+   * overlapping segments go through ffmpeg's concat demuxer — a throwaway list
+   * file, because that demuxer only reads its entries from a file — and the
+   * seek is re-based to the first listed segment. -ss before -i seeks fast
+   * (keyframe, then decode-and-discard) and is frame-accurate because
+   * everything is re-encoded anyway; it also resets timestamps to zero, so the
+   * fade times below are song-relative.
    *
    * The overlay PNG needs -loop 1: a single frame reaches EOF immediately and
    * fade would have nothing left to fade. `alpha=1` animates only the alpha
    * plane — hence the explicit format=rgba first — so the scrim fades as a
-   * whole instead of blending to black. scale=-2:H matches the overlay to the
-   * source's line count (a no-op at 1080); pinned at 0:0, whatever sticks out
+   * whole instead of blending to black. The scale squeezes the square-pixel
+   * overlay into the source's storage pixels — its line count, and 1/sar
+   * horizontally — so that the player's display stretch undoes the squeeze
+   * instead of distorting the artwork; pinned at 0:0, whatever sticks out
    * past the source's right edge is clipped by overlay itself. eof_action=pass
    * plus the enable window keeps the main video untouched once the overlay has
    * fully faded, and enable also skips the per-frame compositing cost for the
@@ -366,13 +403,22 @@ for (const song of songs) {
    *
    * Real footage, so none of the still-image tricks from create-video-from-mp3
    * apply: default GOP, no stillimage tune. crf 19 is generous against the
-   * camera's ~2.5 Mbps source. The audio is Opus in this recording, which MP4
-   * players widely refuse, so it is re-encoded to the same 192k AAC the other
-   * tool uses.
+   * camera's source bitrate. The camera records 5.1 AC-3, which is really just
+   * its built-in mics; it is downmixed to stereo and re-encoded to the same
+   * 192k AAC the other tool uses — 192k spread over six channels would be the
+   * worse trade.
    */
+  const used = segments.filter((s) => s.start < until && s.start + s.duration > from);
+  const list = join(outDir, `${stem}.segments.txt`);
+  writeFileSync(
+    list,
+    used.map((s) => `file '${s.path.replaceAll('\\', '/').replaceAll("'", "'\\''")}'\n`).join(''),
+  );
+
   const overlayEnd = FADE_IN + HOLD + FADE_OUT;
+  const overlayWidth = 2 * Math.round((WIDTH * (video.height / 1080)) / video.sar / 2);
   const filter =
-    `[1:v]format=rgba,scale=-2:${video.height},` +
+    `[1:v]format=rgba,scale=${overlayWidth}:${video.height},` +
     `fade=t=in:st=0:d=${FADE_IN}:alpha=1,` +
     `fade=t=out:st=${FADE_IN + HOLD}:d=${FADE_OUT}:alpha=1[ov];` +
     `[0:v][ov]overlay=0:0:eof_action=pass:enable='lte(t,${overlayEnd + 0.1})'[v]`;
@@ -380,19 +426,21 @@ for (const song of songs) {
   const result = encode(
     [
       '-y',
-      '-ss', from.toFixed(3), '-t', (until - from).toFixed(3), '-i', source,
+      '-f', 'concat', '-safe', '0',
+      '-ss', (from - used[0].start).toFixed(3), '-t', (until - from).toFixed(3), '-i', list,
       '-loop', '1', '-framerate', '30', '-i', png,
       '-filter_complex', filter,
       '-map', '[v]', '-map', '0:a',
       '-c:v', 'libx264', '-preset', 'medium', '-crf', '19',
       '-profile:v', 'high', '-pix_fmt', 'yuv420p',
-      '-c:a', 'aac', '-b:a', '192k', '-ar', '48000',
+      '-c:a', 'aac', '-b:a', '192k', '-ac', '2', '-ar', '48000',
       '-movflags', '+faststart',
       partial,
     ],
     partial,
     mp4,
   );
+  rmSync(list, { force: true });
 
   if (!result.ok) {
     console.error(`  ! ${song.title}: ffmpeg failed\n${result.detail}`);
