@@ -415,6 +415,17 @@ h3 {
   margin-block-end: 12px;
 }
 
+/* Sub-heading within a section — only the privacy notice has one. The global
+   Anton face reads far heavier than the condensed h2 above it, so this takes
+   the h2's face in white, one step down in the hierarchy. */
+.legal h3 {
+  font-family: var(--bb-condensed);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  margin-block: 28px 12px;
+}
+
 .legal p {
   font-size: 15px;
   line-height: 1.8;
