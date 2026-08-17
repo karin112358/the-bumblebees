@@ -10,6 +10,5 @@ export default defineConfig({
   //
   // If this ever moves to a custom domain, set `site` to that domain and
   // delete `base` — a custom domain serves from the root.
-  site: 'https://karin112358.github.io',
-  base: '/the-bumblebees',
+  site: 'https://thebumblebees.at',
 });
