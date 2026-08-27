@@ -21,6 +21,9 @@ const shows = defineCollection({
       soldOut: z.boolean().default(false),
       // Rendered as the tag at the right of each show row, e.g. "Eintritt frei".
       note: z.string().optional(),
+      // Rendered as a full-width highlighted line below the show details, for
+      // announcements that need a whole sentence, e.g. a sickness notice.
+      notice: z.string().optional(),
     })
     .transform((entry, ctx) => {
       // Read the calendar date and optional start time straight from the text

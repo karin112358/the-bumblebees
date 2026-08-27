@@ -70,6 +70,16 @@ const { upcoming } = await getShows();
                   </span>
                 )
               )}
+
+              {show.data.notice && (
+                <div class="notice">
+                  <span class="notice-icon" aria-hidden="true">!</span>
+                  <div>
+                    <p class="notice-title">Wichtiger Hinweis</p>
+                    <p class="notice-text">{show.data.notice}</p>
+                  </div>
+                </div>
+              )}
             </li>
           );
         })}
@@ -194,6 +204,44 @@ const { upcoming } = await getShows();
 
   .out {
     color: var(--bb-faint);
+  }
+
+  .notice {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-block-start: 6px;
+    padding: 16px 20px;
+    background: var(--bb-amber);
+    color: var(--bb-black);
+  }
+
+  .notice-icon {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 2px solid var(--bb-black);
+    border-radius: 50%;
+    font-family: var(--bb-display);
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .notice-title {
+    font-family: var(--bb-condensed);
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+
+  .notice-text {
+    margin-block-start: 2px;
+    font-size: 15px;
+    font-weight: 600;
   }
 
   .empty {

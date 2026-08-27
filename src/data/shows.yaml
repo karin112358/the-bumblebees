@@ -3,9 +3,11 @@
 # Neuen Termin anlegen: Eintrag unten anhängen. Schema in src/content.config.ts.
 #
 # Pflicht:  id (eindeutig), date (JJJJ-MM-TT, optional mit Uhrzeit "JJJJ-MM-TT HH:MM"), venue, city
-# Optional: country, ticketUrl, infoUrl, soldOut (Standard false), note
+# Optional: country, ticketUrl, infoUrl, soldOut (Standard false), note, notice
 #
 # `note` wird im Design als Tag rechts in der Zeile gerendert, z. B. "Eintritt frei".
+# `notice` wird als eigene Hinweiszeile unter dem Termin gerendert — für längere
+# Ankündigungen, z. B. eine Absage.
 # Alles was wie eine Zahl oder Uhrzeit aussieht bitte quoten, z. B. note: "3:42".
 #
 # Vergangen/kommend wird beim Build aus `date` abgeleitet — siehe src/lib/shows.ts.
@@ -18,6 +20,7 @@
   infoUrl: "https://www.rohr.ooe.gv.at/system/web/GetDocument.ashx?cts=1784708644&fileId=4343912&name=Datei%20herunterladen%20(1,12%20MB)%20-%20.PDF"
   soldOut: false
   note: Eintritt frei
+  notice: "Wegen Krankheit können die Bumblebees leider nicht beim Event dabei sein."
 
 - id: erntedankfest-bad-hall-2026
   date: 2026-09-27 16:00
