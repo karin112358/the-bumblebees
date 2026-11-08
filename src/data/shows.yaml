@@ -29,3 +29,10 @@
   country: Oberösterreich
   soldOut: false
   note: Eintritt frei
+
+- id: soundbox-rohr-2026
+  date: 2026-11-21 18:00
+  venue: Soundbox
+  city: Gasthof Klein, Linzer Straße 20, 4532 Rohr im Kremstal
+  country: Oberösterreich
+  soldOut: false
