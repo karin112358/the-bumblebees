@@ -1,0 +1,154 @@
+---
+import { getImage } from 'astro:assets';
+
+import { members } from '../data/members';
+import { instagramUrl, youtubeUrl } from '../data/social';
+import { getShows, isoDate, type Show } from '../lib/shows';
+
+import heroPhoto from '../assets/images/band-1.jpg';
+
+/*
+ * schema.org JSON-LD for search engines: one MusicGroup for the band and one
+ * MusicEvent per upcoming show. The events are what can surface the gigs as
+ * event results in Google; the group ties the site to the Instagram and
+ * YouTube profiles through `sameAs`.
+ *
+ * Everything is derived from the same data the page renders (shows.yaml,
+ * members.ts, social.ts), so a new gig needs no edit here. Check the output
+ * with https://search.google.com/test/rich-results after changing this file.
+ */
+
+const site = Astro.site!;
+const bandId = new URL('/#band', site).href;
+
+// Same parameters as the og:image in BaseLayout, so the build reuses the file.
+const image = new URL(
+  (await getImage({ src: heroPhoto, width: 1200, height: 630, format: 'jpeg' })).src,
+  site,
+).href;
+
+const band = {
+  '@type': 'MusicGroup',
+  '@id': bandId,
+  name: 'The Bumblebees',
+  url: site.href,
+  // A raster file, not one of the logo SVGs: Google wants at least 112×112 px
+  // in a format it indexes reliably, and the 180×180 touch icon already is one.
+  logo: new URL('/apple-touch-icon.png', site).href,
+  image,
+  description:
+    'Rock-, Funk- und Soul-Coverband der Landesmusikschule Bad Hall in Oberösterreich, mit Gesang, Gitarre, Bass, Schlagzeug, Piano und zwei Saxophonen.',
+  genre: ['Rock', 'Funk', 'Soul', 'Pop'],
+  foundingLocation: {
+    '@type': 'Place',
+    name: 'Landesmusikschule Bad Hall',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Bad Hall',
+      addressRegion: 'Oberösterreich',
+      addressCountry: 'AT',
+    },
+  },
+  areaServed: { '@type': 'AdministrativeArea', name: 'Oberösterreich' },
+  // OrganizationRole is schema.org's way of attaching an instrument to a member.
+  member: members.map((m) => ({
+    '@type': 'OrganizationRole',
+    roleName: m.role,
+    member: { '@type': 'Person', name: m.name },
+  })),
+  sameAs: [instagramUrl, youtubeUrl],
+};
+
+/*
+ * `city` in shows.yaml is free text: "Ort, Straße, PLZ Ort", "Straße, PLZ Ort"
+ * or just a town. Pull out what reliably parses — the trailing postcode and
+ * town, and up to two parts before it — and put the rest into the address as
+ * written rather than guessing.
+ */
+function place(show: Show) {
+  const parts = show.data.city.split(',').map((p) => p.trim());
+  const postal = parts.at(-1)?.match(/^(\d{4})\s+(.+)$/);
+
+  if (!postal) {
+    return { '@type': 'Place', name: show.data.venue, address: show.data.city };
+  }
+
+  const before = parts.slice(0, -1);
+  const [name, street] =
+    before.length >= 2 ? [before[0], before.slice(1).join(', ')] : [show.data.venue, before[0]];
+
+  return {
+    '@type': 'Place',
+    name,
+    address: {
+      '@type': 'PostalAddress',
+      ...(street && { streetAddress: street }),
+      postalCode: postal[1],
+      addressLocality: postal[2],
+      ...(show.data.country && { addressRegion: show.data.country }),
+      // Every show so far is in Austria; add a field to the schema if that changes.
+      addressCountry: 'AT',
+    },
+  };
+}
+
+/*
+ * Google wants a start time with a UTC offset. The show's wall-clock time is
+ * Austrian, so ask Intl for Vienna's offset on that day (+01:00 or +02:00) —
+ * the build machine's own zone is irrelevant, and the CI runner is UTC.
+ */
+function startDate(show: Show) {
+  if (!show.data.time) return isoDate(show.data.date);
+
+  const day = isoDate(show.data.date);
+  const noonUtc = new Date(`${day}T12:00:00Z`);
+  const offset =
+    new Intl.DateTimeFormat('en', { timeZone: 'Europe/Vienna', timeZoneName: 'longOffset' })
+      .formatToParts(noonUtc)
+      .find((p) => p.type === 'timeZoneName')
+      ?.value.replace('GMT', '') || '+00:00';
+
+  return `${day}T${show.data.time}:00${offset}`;
+}
+
+const { upcoming } = await getShows();
+
+const events = upcoming
+  .filter((show) => !show.data.cancelled)
+  .map((show) => ({
+    '@type': 'MusicEvent',
+    name: `The Bumblebees live: ${show.data.venue}`,
+    startDate: startDate(show),
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    location: place(show),
+    image,
+    description: `Live-Musik mit The Bumblebees: Rock, Funk, Soul und Pop mit Gesang, Gitarre, Piano und Saxophon.`,
+    // Type and name inline as well as the @id, so a parser that reads the event
+    // on its own, without resolving references in the graph, still has them.
+    performer: { '@type': 'MusicGroup', '@id': bandId, name: band.name },
+    // "Eintritt frei" is the only admission the data currently records, and it
+    // lives in the free-text `note`, so match on that rather than add a field.
+    ...(/eintritt frei/i.test(show.data.note ?? '') && { isAccessibleForFree: true }),
+    ...(show.data.ticketUrl && {
+      offers: {
+        '@type': 'Offer',
+        url: show.data.ticketUrl,
+        availability: show.data.soldOut
+          ? 'https://schema.org/SoldOut'
+          : 'https://schema.org/InStock',
+      },
+    }),
+    ...(show.data.infoUrl && { url: show.data.infoUrl }),
+  }));
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [band, ...events],
+};
+
+// "<" is escaped so no string in the data can close the script element early.
+const json = JSON.stringify(graph).replace(/</g, '\\u003c');
+---
+
+<script is:inline type="application/ld+json" set:html={json} />

@@ -45,9 +45,10 @@ const lineup = [...new Set(members.map((m) => m.role))]
       Saxophon passt.
     </p>
     <p class="bb-prose body">
-      Ob Stadtfest, Vereinsveranstaltung, Firmenfeier oder Musikabend: Wir
-      freuen uns über Bühnen, auf denen ehrliche, handgemachte Livemusik gefragt
-      ist.
+      Zu Hause sind wir an der Landesmusikschule Bad Hall, unterwegs vor allem in
+      Oberösterreich. Ob Stadtfest, Vereinsveranstaltung, Firmenfeier oder
+      Musikabend: Wir freuen uns über Bühnen, auf denen ehrliche, handgemachte
+      Livemusik gefragt ist.
     </p>
     <p class="lineup">{lineup}</p>
   </div>
@@ -74,7 +75,8 @@ const lineup = [...new Set(members.map((m) => m.role))]
 
   h2 {
     font-size: clamp(34px, 5.4vw, 52px);
-    line-height: 0.98;
+    /* Not below ~1.08: the dots of "FÜR" and "BÜHNE" reach into the line above. */
+    line-height: 1.08;
     margin-block: 18px 22px;
   }
 
@@ -88,7 +90,8 @@ const lineup = [...new Set(members.map((m) => m.role))]
     font-family: var(--bb-mono);
     font-size: 11px;
     letter-spacing: 0.2em;
-    color: var(--bb-faint);
+    /* muted, not faint: at 11px faint only reaches 4.2:1 on the panel. */
+    color: var(--bb-muted);
     text-transform: uppercase;
     margin-block-start: 36px;
     line-height: 1.8;

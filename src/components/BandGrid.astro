@@ -35,10 +35,24 @@ import { members } from '../data/members';
 </section>
 
 <style>
+  /*
+   * Flex rather than grid so an incomplete last row is centred instead of
+   * hanging left — seven members leave one short row at every column count
+   * (4+3, 3+3+1, 2+2+2+1). --cols sets the item width; the gap is subtracted so
+   * the columns still line up with a full row above.
+   */
   .grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
+    --cols: 4;
+    --gap: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--gap);
+  }
+
+  .grid li {
+    flex: 0 0 calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols));
+    min-inline-size: 0;
   }
 
   .frame {
@@ -94,18 +108,25 @@ import { members } from '../data/members';
     letter-spacing: 0.02em;
     line-height: 1.12;
     margin-block-start: 2px;
+    /* A long double name ("Stummer-Brandstätter") breaks at the hyphen rather
+       than leaving one word dangling. */
+    text-wrap: balance;
   }
 
   @media (max-width: 1024px) {
     .grid {
-      grid-template-columns: repeat(3, 1fr);
+      --cols: 3;
     }
   }
 
   @media (max-width: 640px) {
     .grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
+      --cols: 2;
+      --gap: 14px;
+    }
+
+    .name {
+      font-size: 15px;
     }
   }
 </style>

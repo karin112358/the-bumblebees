@@ -24,9 +24,14 @@ const datenschutzHref = `${base}/datenschutz/`;
 */}
 <footer class="footer">
   <div class="inner bb-container">
-    <span>© {year} The Bumblebees</span>
-    <a href={impressumHref}>Impressum</a>
-    <a href={datenschutzHref}>Datenschutz</a>
+    <span class="copy">© {year} The Bumblebees</span>
+
+    {/* Grouped so the two legal links read as one unit instead of being spread
+        across the bar by space-between. */}
+    <span class="legal-links">
+      <a href={impressumHref}>Impressum</a>
+      <a href={datenschutzHref}>Datenschutz</a>
+    </span>
 
     {/*
       Plain outbound links, deliberately: no Meta or Google plugin, no button
@@ -78,13 +83,24 @@ const datenschutzHref = `${base}/datenschutz/`;
   .inner {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 16px;
     flex-wrap: wrap;
     font-family: var(--bb-mono);
     font-size: 11px;
     letter-spacing: 0.16em;
-    color: var(--bb-dimmer);
+    /*
+     * muted rather than the darker end of the ramp: at 11px the old dimmer grey
+     * was 2.5:1, and the imprint and privacy links have to stay easy to find
+     * (§ 25 MedienG, Art. 12 DSGVO) — 5.4:1 now.
+     */
+    color: var(--bb-muted);
     text-transform: uppercase;
+  }
+
+  .legal-links {
+    display: flex;
+    gap: 28px;
   }
 
   /* The footer keeps its own muted tone rather than the global amber links. */
@@ -127,5 +143,23 @@ const datenschutzHref = `${base}/datenschutz/`;
     /* Keeps the tap area from making the footer visibly taller than its text. */
     margin-block: -8px;
     border-radius: var(--bb-radius-btn);
+  }
+
+  /*
+   * On a phone the free wrap broke the row at arbitrary points. A fixed shape
+   * instead: links left and icons right on the first line, the copyright line
+   * on its own below.
+   */
+  @media (max-width: 640px) {
+    .inner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      row-gap: 18px;
+    }
+
+    .copy {
+      grid-row: 2;
+      grid-column: 1 / -1;
+    }
   }
 </style>

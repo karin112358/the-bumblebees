@@ -24,6 +24,10 @@ const shows = defineCollection({
       // Rendered as a full-width highlighted line below the show details, for
       // announcements that need a whole sentence, e.g. a sickness notice.
       notice: z.string().optional(),
+      // The band is not playing after all. The row stays listed while upcoming
+      // (with its notice), but the show is left out of the past-shows archive
+      // and of the structured data, so neither claims a gig that didn't happen.
+      cancelled: z.boolean().default(false),
     })
     .transform((entry, ctx) => {
       // Read the calendar date and optional start time straight from the text

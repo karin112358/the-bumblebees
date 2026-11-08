@@ -6,20 +6,63 @@ import band3 from '../assets/images/band-3.jpg';
 import band4 from '../assets/images/band-4.jpg';
 import band5 from '../assets/images/band-5.jpg';
 import bandWide from '../assets/images/band-3.jpeg';
+import courtyard from '../assets/images/band-2.jpeg';
+import bassist from '../assets/images/harald-pixner-3.jpg';
 
 /*
- * Five tiles on a three-column grid. Tile 1 is double-height and tile 5 is
- * double-width, which is what gives the block its rhythm.
+ * Seven tiles on a three-column grid: one double-height, one double-width and
+ * five singles fill exactly 3 × 3 cells. The count matters — five tiles left
+ * two holes. Adding or removing a photo breaks the grid again unless the
+ * spans are rebalanced.
  *
- * band-3.jpeg is the panoramic one (2016x1134) so it takes the wide slot;
- * band-1.jpg is spoken for by the hero.
+ * The tall slot takes the one portrait photo, so it isn't a landscape shot
+ * cropped to a sliver. band-3.jpeg is the panoramic one (2016x1134), so it
+ * takes the wide slot. band-1.* is spoken for by the hero. band-5.jpeg is left
+ * out on purpose: it is nearly the same frame as band-3.jpeg.
+ */
+/*
+ * Alt texts say what is actually in the frame — they are read out to screen
+ * reader users and are what image search indexes. The arcade shots are from
+ * the Schloss Cafe Bar Sierning gig on 11 July 2026 (see the video covers in
+ * tools/youtube); band-3.jpg is from a different, open-air square.
+ */
+/*
+ * Order is what places the spans: tall first (left column, rows 1–2), four
+ * singles fill the right two columns, then wide and the last single share
+ * row 3. `position` keeps faces in frame where cover crops hard.
  */
 const tiles = [
-  { src: band2, alt: 'Die Bumblebees auf der Bühne', span: 'tall' },
-  { src: band3, alt: 'Die Bumblebees beim Konzert' },
-  { src: band4, alt: 'Die Bumblebees live' },
-  { src: band5, alt: 'Die Bumblebees im Auftritt' },
-  { src: bandWide, alt: 'Die Bumblebees in voller Besetzung', span: 'wide' },
+  {
+    src: bassist,
+    alt: 'Bassist Harald Pixner der Bumblebees vor dem Schlagzeug unter den Arkaden',
+    span: 'tall',
+    position: 'center 25%',
+  },
+  {
+    src: band2,
+    alt: 'Die Bumblebees Arm in Arm auf der Bühne der Schloss Cafe Bar Sierning',
+  },
+  {
+    src: band3,
+    alt: 'Blick von der Bühne: Die Bumblebees spielen Open Air vor vollem Platz',
+  },
+  {
+    src: band4,
+    alt: 'Die Bumblebees mit Gitarre, Saxophon, Gesang, Bass und Piano unter den Arkaden in Sierning',
+  },
+  {
+    src: courtyard,
+    alt: 'Volle Tische im Schlosshof Sierning beim Konzert der Bumblebees',
+  },
+  {
+    src: bandWide,
+    alt: 'Sängerin, Gitarrist und Bassist der Bumblebees live in der Schloss Cafe Bar Sierning',
+    span: 'wide',
+  },
+  {
+    src: band5,
+    alt: 'Saxophon, Bass, Schlagzeug und Piano der Bumblebees im roten Bühnenlicht in Sierning',
+  },
 ];
 ---
 
@@ -31,7 +74,7 @@ const tiles = [
 
   <ul class="grid">
     {
-      tiles.map(({ src, alt, span }) => (
+      tiles.map(({ src, alt, span, position }) => (
         <li class={span}>
           <Image
             src={src}
@@ -39,6 +82,7 @@ const tiles = [
             widths={[400, 800, 1200]}
             sizes="(max-width: 720px) 100vw, 33vw"
             loading="lazy"
+            style={position ? `object-position: ${position}` : undefined}
           />
         </li>
       ))
@@ -84,6 +128,11 @@ const tiles = [
     .grid {
       grid-template-columns: repeat(2, 1fr);
       grid-auto-rows: 150px;
+      /*
+       * On two columns the wide tile can't sit beside the single that follows
+       * it, so without dense packing it would leave a hole in the row above.
+       */
+      grid-auto-flow: dense;
     }
 
     /* The span tricks stop reading as rhythm once there are only two columns. */

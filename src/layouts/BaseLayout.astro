@@ -11,12 +11,15 @@ interface Props {
 
 const {
   title = 'The Bumblebees',
-  description = 'The Bumblebees — sieben Hobbymusiker aus Oberösterreich. Rock, Bläser und eine Setlist, bei der der Spaß im Vordergrund steht. Kommende Konzerte und Booking.',
+  // Names the region and the music school on purpose: people who don't know the
+  // band yet search for "Band Oberösterreich" or "Live-Musik Bad Hall", not for
+  // its name. Keep it under ~160 characters so Google doesn't cut it off.
+  description = 'Rock-, Funk- und Soul-Coverband der Landesmusikschule Bad Hall (Oberösterreich). Live-Musik mit Gesang, Gitarre, Piano und Saxophon – Konzerte und Booking.',
 } = Astro.props;
 
 const pageTitle =
   title === 'The Bumblebees'
-    ? 'The Bumblebees — Live-Musik · Rock'
+    ? 'The Bumblebees — Rock- & Coverband aus Oberösterreich'
     : `${title} — The Bumblebees`;
 
 /*
@@ -85,6 +88,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:card" content="summary_large_image" />
 
     <meta name="sa-verify" content="wkarin112356menw" />
+
+    {/* Page-specific head content, e.g. the JSON-LD on the home page. */}
+    <slot name="head" />
 
     {
       /*

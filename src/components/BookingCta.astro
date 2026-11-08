@@ -90,14 +90,14 @@ const email = 'booking@thebumblebees.at';
   }
 
   /*
-   * 1.02 rather than the 0.94 this used to carry. At 0.94 the umlaut dots of
-   * "BÜHNE" collided with the line above — uppercase diacritics sit higher than
-   * the cap height, and German headings here will always have some. The look is
-   * still tight, just not broken.
+   * 1.1 rather than the 0.94 this started at. Uppercase diacritics sit above
+   * the cap height, so the dots of "BÜHNE" touched the line above at 0.94 and
+   * still did at 1.02 on a phone. German headings here will always have some.
+   * The look is still tight, just not broken.
    */
   h2 {
     font-size: clamp(36px, 6.4vw, 60px);
-    line-height: 1.02;
+    line-height: 1.1;
     color: var(--bb-panel);
     max-inline-size: 640px;
     /* The gap down to the first paragraph; .bb-prose owns the ones between. */
@@ -186,14 +186,18 @@ const email = 'booking@thebumblebees.at';
     border-block-start: 1px solid var(--bb-border);
   }
 
+  /*
+   * Still secondary to the e-mail button, but legible as a real second way to
+   * reach the band: brighter than the hint text above it and a step larger.
+   */
   .social a {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     font-family: var(--bb-mono);
-    font-size: 12px;
+    font-size: 13px;
     letter-spacing: 0.08em;
-    color: var(--bb-muted);
+    color: var(--bb-nav);
   }
 
   .social a:hover {

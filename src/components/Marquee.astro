@@ -7,7 +7,36 @@
  */
 import beeBlackUrl from '../assets/logo/bee-black.svg?url';
 
-const phrase = 'Rockmusik ✦ Live ✦ The Bumblebees';
+import { getShows, formatShowDate } from '../lib/shows';
+
+/*
+ * The strip says something the hero doesn't: the styles, and the next gig
+ * straight from shows.yaml. Like the show list, the date is frozen at build
+ * time and moves on with the next rebuild. Without an upcoming (non-cancelled)
+ * show it falls back to a plain "Live".
+ */
+const { upcoming } = await getShows();
+const next = upcoming.find((show) => !show.data.cancelled);
+
+// The town is the text after the postcode in "…, 4532 Rohr im Kremstal".
+const town = next?.data.city.split(',').at(-1)?.trim().replace(/^\d{4}\s+/, '');
+const date = next && formatShowDate(next.data.date);
+
+const styles = ['Rock', 'Funk', 'Soul', 'Pop'];
+const phrase = [...styles, date ? `Nächstes Konzert ${date.day}. ${date.month} – ${town}` : 'Live'].join(
+  ' ✦ ',
+);
+// Spelled out for screen readers: "21. November", not the visual "21. NOV".
+const spoken = [...styles, date ? `Nächstes Konzert am ${date.spoken} in ${town}` : 'Live'].join('. ');
+
+/*
+ * The animation runs one copy per cycle, so a fixed duration would make the
+ * speed follow the phrase length, which now changes with shows.yaml (a long
+ * town, or the short "Live" fallback). Scaling by character count keeps it at
+ * roughly the original ~46px/s. 0.3s per character is measured, not derived.
+ */
+const SECONDS_PER_CHAR = 0.3;
+const duration = `${(phrase.length * SECONDS_PER_CHAR).toFixed(1)}s`;
 
 /*
  * The strip loops by shifting left exactly one copy, then snapping back — so
@@ -15,18 +44,18 @@ const phrase = 'Rockmusik ✦ Live ✦ The Bumblebees';
  * on their own. Otherwise a blank wedge sweeps through on every cycle, which is
  * invisible on a phone and obvious on a desktop.
  *
- * One copy renders around 510px at the maximum font size, so 9 spare copies
- * cover roughly 4590px — comfortably past any real browser window. The extra
- * markup is a few hundred bytes.
+ * One copy renders well over 510px at the maximum font size, so 9 spare
+ * copies cover more than 4590px — comfortably past any real browser window.
+ * The extra markup is a few hundred bytes.
  */
 const COPIES = 10;
 ---
 
 <div class="marquee">
-  <div class="track" aria-hidden="true" style={`--copies:${COPIES}`}>
+  <div class="track" aria-hidden="true" style={`--copies:${COPIES}; --duration:${duration}`}>
     {Array.from({ length: COPIES }, () => <span>{phrase}</span>)}
   </div>
-  <span class="sr-only">Rockmusik. Live. The Bumblebees.</span>
+  <span class="sr-only">{spoken}.</span>
 </div>
 
 <style>
@@ -41,9 +70,10 @@ const COPIES = 10;
     width: max-content;
     /*
      * Duration is time-per-copy, not time-per-loop, so the scroll speed stays
-     * constant if COPIES ever changes.
+     * constant if COPIES ever changes. --duration comes from the phrase length
+     * in the frontmatter.
      */
-    animation: bb-marquee 11s linear infinite;
+    animation: bb-marquee var(--duration) linear infinite;
     font-family: var(--bb-display);
     font-size: clamp(20px, 3vw, 26px);
     letter-spacing: 0.06em;

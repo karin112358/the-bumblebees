@@ -52,6 +52,11 @@ export function formatShowDate(date: Date) {
     day: part({ day: 'numeric' }),
     // "Aug" / "Sep", likewise without the German trailing period.
     month: part({ month: 'short' }).replace('.', '').toUpperCase(),
+    // "21. November" — for text that is read rather than seen, e.g. the
+    // marquee's screen-reader line, where "NOV" could be spelled out.
+    spoken: part({ day: 'numeric', month: 'long' }),
+    // "27.09.2026" — the compact form the past-shows archive lists.
+    numeric: part({ day: '2-digit', month: '2-digit', year: 'numeric' }),
   };
 }
 

@@ -26,17 +26,24 @@ const home = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
 
 const links = [
   { hash: '#ueber-uns', label: 'Über uns' },
+  { hash: '#band', label: 'Band' },
   { hash: '#medien', label: 'Galerie' },
   { hash: '#video', label: 'Video' },
   { hash: '#konzerte', label: 'Konzerte' },
-  { hash: '#buchen', label: 'Buchen' },
+  // `cta` marks the one link styled as the call to action in the mobile drawer.
+  { hash: '#buchen', label: 'Buchen', cta: true },
 /*
  * `id` rides along beside the finished href: the scroll spy has to find each
  * link's section, and the rendered href is base-prefixed, so a lookup by
  * href alone would have to parse the URL back apart. Derived here so the list
  * above stays the single place a section is named.
  */
-].map(({ hash, label }) => ({ href: `${home}${hash}`, id: hash.slice(1), label }));
+].map(({ hash, label, cta = false }) => ({
+  href: `${home}${hash}`,
+  id: hash.slice(1),
+  label,
+  cta,
+}));
 
 /*
  * The design highlights one link as the current section, which only means
@@ -85,8 +92,8 @@ const onHome = strip(Astro.url.pathname) === strip(home);
 
     <nav id="nav-links" class="links" aria-label="Hauptnavigation">
       {
-        links.map(({ href, id, label }) => (
-          <a href={href} data-section={id}>
+        links.map(({ href, id, label, cta }) => (
+          <a href={href} data-section={id} class:list={{ cta }}>
             {label}
           </a>
         ))
@@ -137,10 +144,10 @@ const onHome = strip(Astro.url.pathname) === strip(home);
    *
    * Deliberately a scroll listener rather than another IntersectionObserver
    * like the one above: the sentinel is a single binary state that flips
-   * rarely, while the active section is decided by five boundaries crossing
+   * rarely, while the active section is decided by six boundaries crossing
    * one line. An observer would need a rootMargin collapsing the viewport to
    * that line — a value that depends on the viewport height and has to be
-   * rebuilt on every resize, for no less work than the five rect reads below.
+   * rebuilt on every resize, for no less work than the six rect reads below.
    */
   if (header?.classList.contains('is-home')) {
     const targets: { link: HTMLAnchorElement; section: HTMLElement }[] = [];
@@ -193,9 +200,9 @@ const onHome = strip(Astro.url.pathname) === strip(home);
         /*
          * The last section that has been reached — none of them over the hero,
          * where the reader is not in a section yet and nothing is marked.
-         * Sections without a link of their own (#setlist, #band) are not
-         * candidates, so they leave the preceding one marked rather than
-         * blanking the highlight halfway down the page.
+         * A section without a link of its own (#setlist) is not a candidate,
+         * so it leaves the preceding one marked rather than blanking the
+         * highlight halfway down the page.
          */
         let active: HTMLAnchorElement | null = null;
 
@@ -403,6 +410,22 @@ const onHome = strip(Astro.url.pathname) === strip(home);
 
     .links a + a {
       border-block-start: 1px solid var(--bb-border);
+    }
+
+    /*
+     * Booking is the one action the page exists for, so in the drawer it is a
+     * solid amber row rather than one more grey label. Desktop keeps the plain
+     * text row, where the hero and the booking band already carry the CTA.
+     */
+    .links a.cta {
+      background: var(--bb-amber);
+      color: var(--bb-panel);
+    }
+
+    .links a.cta:hover,
+    .nav.is-home .links a.cta[aria-current='true'] {
+      background: var(--bb-amber-hover);
+      color: var(--bb-panel);
     }
 
     .nav.is-open .bars {

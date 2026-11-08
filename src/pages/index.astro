@@ -12,9 +12,11 @@ import VideoSection from '../components/VideoSection.astro';
 import Shows from '../components/Shows.astro';
 import BookingCta from '../components/BookingCta.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import StructuredData from '../components/StructuredData.astro';
 ---
 
 <BaseLayout>
+  <StructuredData slot="head" />
   <SiteNav />
   <Hero />
   <Marquee />

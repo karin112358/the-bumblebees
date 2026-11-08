@@ -1,14 +1,14 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  // Deployed as a GitHub Pages *project* page, so the origin and the
-  // subdirectory are configured separately: `site` is the bare origin and
-  // `base` is the repo name. Together they produce
-  // https://karin112358.github.io/the-bumblebees/ for canonical and og: URLs.
-  //
-  // If this ever moves to a custom domain, set `site` to that domain and
-  // delete `base` — a custom domain serves from the root.
+  // Served from the custom domain's root via GitHub Pages, so there is no
+  // `base`. `site` is what canonical, og: and sitemap URLs are built from —
+  // change it here if the domain ever changes.
   site: 'https://thebumblebees.at',
+  // Writes sitemap-index.xml (+ sitemap-0.xml) at build time; public/robots.txt
+  // points crawlers at it.
+  integrations: [sitemap()],
 });

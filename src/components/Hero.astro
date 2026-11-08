@@ -50,7 +50,12 @@ const slides = [
   <div class="scrim" aria-hidden="true"></div>
 
   <div class="content">
-    <p class="kicker">Rockklassiker, starke Stimme und Saxophon-Power</p>
+    {/*
+      Genre and region are spelled out here, visibly, for people searching
+      "Coverband Oberösterreich" — not as hidden text in the h1, which Google
+      treats as spam when it says more than what is on screen.
+    */}
+    <p class="kicker">Rock- &amp; Coverband aus Oberösterreich</p>
     <h1 class="wordmark">
       <Wordmark role="img" aria-label="The Bumblebees" />
     </h1>
